@@ -10,22 +10,17 @@
     <header>
       <h1>Minado</h1>
       <nav>
-        <button type="button">New game</button>
-        <button type="button">Customise game</button>
+        <button type="button" data-action="new">New game</button>
+        <button type="button" data-action="customise">Customise game</button>
       </nav>
     </header>
 
     <main>
-      <div id="field">
-        <button type="button" data-corner="top-left">&nbsp;</button>
-        <button type="button" data-corner="top-right">&nbsp;</button>
-        <button type="button" data-corner="bottom-left">&nbsp;</button>
-        <button type="button" data-corner="bottom-right">&nbsp;</button>
-      </div>
+      <div id="field"></div>
 
       <output>
         <strong class="pill-blue">STATUS</strong>
-        <span>Waiting for first click</span>
+        <span id="status-line">Loading...</span>
       </output>
 
       <a href="/instructions.html">Instructions</a>

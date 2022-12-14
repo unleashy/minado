@@ -3,8 +3,8 @@
   --step-1: clamp(1.09rem, calc(1.05rem + 0.24vw), 1.25rem);
   --step-2: clamp(1.37rem, calc(1.31rem + 0.3vw), 1.56rem);
 
-  --field-rows: 2;
-  --field-columns: 2;
+  --field-rows: 9;
+  --field-cols: 9;
 }
 
 *,
@@ -33,7 +33,7 @@ body {
   font-size: var(--step-0);
 
   max-width: 80ch;
-  margin: 1rem auto 4rem;
+  margin: 1rem auto 2rem;
   padding: 2rem;
   text-align: center;
 
@@ -101,7 +101,7 @@ main {
 #field {
   display: grid;
   grid-template-rows: repeat(var(--field-rows), 3ch);
-  grid-template-columns: repeat(var(--field-columns), 3ch);
+  grid-template-columns: repeat(var(--field-cols), 3ch);
   gap: 1px;
 }
 
