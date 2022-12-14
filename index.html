@@ -7,6 +7,27 @@
   </head>
 
   <body>
-    <h1>hello world</h1>
+    <header>
+      <h1>Minado</h1>
+      <nav>
+        <button type="button">New game</button>
+      </nav>
+    </header>
+
+    <main>
+      <div id="field">
+        <button type="button" data-corner="top-left">&nbsp;</button>
+        <button type="button" data-corner="top-right">&nbsp;</button>
+        <button type="button" data-corner="bottom-left">&nbsp;</button>
+        <button type="button" data-corner="bottom-right">&nbsp;</button>
+      </div>
+
+      <output>
+        <strong class="pill-blue">STATUS</strong>
+        <span>Waiting for first click</span>
+      </output>
+    </main>
+
+    <script type="module" src="/src/index.ts"></script>
   </body>
 </html>
