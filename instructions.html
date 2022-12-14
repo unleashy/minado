@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minado: Instructions</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>Instructions</h1>
+
+      <a href="/">Go back</a>
+    </header>
+
+    <main class="text-align:left align-items:start">
+      <p>
+        Minado is an implementation of the classic minesweeper game. Mines are
+        laid randomly on the field, and you must open all cells without opening
+        a cell with a mine.
+      </p>
+
+      <p>
+        Start playing by left-clicking on any cell, which is guaranteed to not
+        contain a mine.
+      </p>
+
+      <p>
+        On every opened and mine-free cell there will be a number from 1 to 8,
+        telling you the amount of mines adjacent to that cell. If there are zero
+        mines adjacent to that cell, no number is displayed.
+      </p>
+
+      <p>If you think a cell contains a mine, flag it by right-clicking.</p>
+
+      <p>
+        Continue opening cells and flagging possible mines. When you’ve opened
+        every non-mine cell, the board is complete and you win. If you open a
+        cell with a mine, you lose.
+      </p>
+
+      <p>
+        Customise your game with the “Customise game” button. You may change the
+        field’s amount of rows and columns, and the amount of mines. The larger
+        the field and the more mines, the harder the game.
+      </p>
+    </main>
+
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>

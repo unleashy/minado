@@ -15,6 +15,11 @@
   padding: 0;
 }
 
+::selection {
+  background-color: #ededec;
+  color: #161615;
+}
+
 html {
   font-family: "Yu Gothic", system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji";
@@ -28,7 +33,7 @@ body {
   font-size: var(--step-0);
 
   max-width: 80ch;
-  margin: 1rem auto;
+  margin: 1rem auto 4rem;
   padding: 2rem;
   text-align: center;
 
@@ -44,6 +49,10 @@ button {
 
   color: inherit;
   border: none;
+}
+
+a {
+  color: inherit;
 }
 
 header {
@@ -143,4 +152,12 @@ output {
   background-color: #10243e;
   font-size: 0.85rem;
   border-radius: 1rem;
+}
+
+.text-align\:left {
+  text-align: left;
+}
+
+.align-items\:start {
+  align-items: flex-start;
 }
