@@ -1,10 +1,11 @@
 import { Game } from "./game";
-import type { Position } from "./position";
+import { type Position } from "./position";
 
 import "./style.css";
 
 type Corner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
+// eslint-disable-next-line complexity
 function getCorner(
   { x, y }: Position,
   rows: number,
@@ -47,8 +48,6 @@ function generateField(rows: number, columns: number): HTMLButtonElement[] {
   return result;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
 const DEFAULT_ROWS = 5;
 const DEFAULT_COLS = 5;
 const DEFAULT_NUM_MINES = 3;
@@ -57,10 +56,10 @@ const game = new Game(DEFAULT_ROWS, DEFAULT_COLS, DEFAULT_NUM_MINES);
 
 let startTime: DOMHighResTimeStamp | undefined;
 
-const statusLine = document.getElementById("status-line");
+const statusLine = document.querySelector("#status-line");
 if (!statusLine) throw new Error("no status line");
 
-const field = document.getElementById("field");
+const field = document.querySelector("#field");
 if (!field) throw new Error("no field");
 
 const renderStatusLine = () => {
@@ -75,9 +74,9 @@ const renderStatusLine = () => {
       deltaSecs.toString().padStart(2, "0") +
       "s";
 
-    statusLine.innerText = `${time} – 0 / ${game.numMines} mines flagged`;
+    statusLine.textContent = `${time} – 0 / ${game.numMines} mines flagged`;
   } else {
-    statusLine.innerText = `Waiting for first click`;
+    statusLine.textContent = `Waiting for first click`;
   }
 };
 
