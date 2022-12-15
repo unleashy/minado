@@ -1,9 +1,7 @@
-import "./style.css";
+import { Game } from "./game";
+import type { Position } from "./position";
 
-type Position = {
-  x: number;
-  y: number;
-};
+import "./style.css";
 
 type Corner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
@@ -53,15 +51,11 @@ function generateField(rows: number, columns: number): HTMLButtonElement[] {
 
 const DEFAULT_ROWS = 5;
 const DEFAULT_COLS = 5;
+const DEFAULT_NUM_MINES = 3;
 
-document.documentElement.style.setProperty(
-  "--field-rows",
-  String(DEFAULT_ROWS)
-);
-document.documentElement.style.setProperty(
-  "--field-cols",
-  String(DEFAULT_COLS)
-);
+const game = new Game(DEFAULT_ROWS, DEFAULT_COLS, DEFAULT_NUM_MINES);
+
+let startTime: DOMHighResTimeStamp | undefined;
 
 const statusLine = document.getElementById("status-line");
 if (!statusLine) throw new Error("no status line");
@@ -69,5 +63,70 @@ if (!statusLine) throw new Error("no status line");
 const field = document.getElementById("field");
 if (!field) throw new Error("no field");
 
-field.append(...generateField(DEFAULT_ROWS, DEFAULT_COLS));
-statusLine.innerText = "Waiting for first click";
+const renderStatusLine = () => {
+  if (startTime) {
+    const deltaTime = performance.now() - startTime;
+    const deltaMins = Math.floor(deltaTime / 60_000);
+    const deltaSecs = Math.floor((deltaTime - deltaMins * 60_000) / 1000);
+
+    const time =
+      deltaMins.toString().padStart(1, "0") +
+      "m" +
+      deltaSecs.toString().padStart(2, "0") +
+      "s";
+
+    statusLine.innerText = `${time} – 0 / ${game.numMines} mines flagged`;
+  } else {
+    statusLine.innerText = `Waiting for first click`;
+  }
+};
+
+const render = () => {
+  // TODO
+};
+
+const initialRender = () => {
+  const rootStyle = document.documentElement.style;
+  rootStyle.setProperty("--field-rows", String(game.rows));
+  rootStyle.setProperty("--field-cols", String(game.columns));
+
+  field.innerHTML = "";
+  field.append(...generateField(game.rows, game.columns));
+  renderStatusLine();
+};
+
+document.addEventListener("click", (e) => {
+  const target = e.target;
+  if (!(target instanceof HTMLButtonElement)) {
+    return;
+  }
+
+  const action = target.dataset["action"];
+  if (action === undefined) {
+    return;
+  }
+
+  e.preventDefault();
+
+  switch (action) {
+    case "open-cell": {
+      game.openCell({
+        x: Number(target.dataset["posX"]),
+        y: Number(target.dataset["posY"])
+      });
+
+      // TODO: use an event
+      startTime = performance.now();
+      renderStatusLine();
+      setInterval(renderStatusLine, 1000);
+      render();
+      break;
+    }
+
+    default: {
+      throw new Error(`unknown action ${action}`);
+    }
+  }
+});
+
+initialRender();
