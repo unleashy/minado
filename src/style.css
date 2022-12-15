@@ -1,11 +1,13 @@
 :root {
-  --step--1: clamp(0.70rem, calc(0.67rem + 0.15vw), 0.80rem);
+  --step--1: clamp(0.7rem, calc(0.67rem + 0.15vw), 0.8rem);
   --step-0: clamp(0.88rem, calc(0.84rem + 0.19vw), 1rem);
   --step-1: clamp(1.09rem, calc(1.05rem + 0.24vw), 1.25rem);
   --step-2: clamp(1.37rem, calc(1.31rem + 0.3vw), 1.56rem);
 
   --field-rows: 9;
   --field-cols: 9;
+
+  --max-w: 80ch;
 }
 
 *,
@@ -16,13 +18,27 @@
   padding: 0;
 }
 
+* {
+  max-width: var(--max-w);
+}
+
+html,
+header,
+main,
+footer,
+nav,
+section,
+div {
+  max-width: none;
+}
+
 ::selection {
   background-color: #ededec;
   color: #161615;
 }
 
 html {
-  font-family: "Yu Gothic", system-ui, sans-serif, "Apple Color Emoji",
+  font-family: "Work Sans", system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji";
   line-height: 1.45;
 
@@ -33,7 +49,6 @@ html {
 body {
   font-size: var(--step-0);
 
-  max-width: 80ch;
   margin: 1rem auto 2rem;
   padding: 2rem;
   text-align: center;
@@ -64,7 +79,7 @@ header {
 
 h1 {
   font-size: var(--step-2);
-  font-weight: bold;
+  font-weight: bolder;
   line-height: 1;
 }
 
