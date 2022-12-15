@@ -11,6 +11,7 @@
     "useDefineForClassFields": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "jsx": "react-jsx",
     "strict": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,

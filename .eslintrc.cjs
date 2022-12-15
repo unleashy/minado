@@ -1,8 +1,10 @@
 module.exports = {
   root: true,
   extends: [
-    "xo",
+    "xo/browser",
     "xo-typescript/space",
+    "xo-react/space",
+    "plugin:react/jsx-runtime",
     "plugin:unicorn/recommended",
     "prettier"
   ],
@@ -48,6 +50,9 @@ module.exports = {
 
     // i like abbreviating
     "unicorn/prevent-abbreviations": "off",
+
+    // disabling this lets us name files after react components
+    "unicorn/filename-case": "off",
 
     // allow things like 0 <= x && x <= 10
     yoda: ["error", "never", { exceptRange: true }]
