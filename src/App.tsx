@@ -2,35 +2,23 @@ import { type MouseEvent, useEffect, useState } from "react";
 import { type Game } from "./game";
 
 export function App({ game }: { game: Game }) {
-  const [status, setStatus] = useState("Loading...");
+  const [startTime, setStartTime] = useState<number | undefined>();
+
+  const [timeElapsed, setTimeElapsed] = useState(0);
   useEffect(() => {
-    setStatus("Waiting for first click");
-  }, []);
+    if (startTime === undefined) {
+      setTimeElapsed(0);
+      return;
+    }
 
-  const [startTime, setStartTime] = useState<DOMHighResTimeStamp | undefined>();
-  useEffect(() => {
-    if (startTime === undefined) return;
-
-    const updateTimer = () => {
-      const deltaTime = performance.now() - startTime;
-      const deltaMins = Math.floor(deltaTime / 60_000);
-      const deltaSecs = Math.floor((deltaTime - deltaMins * 60_000) / 1000);
-
-      const time =
-        deltaMins.toString().padStart(1, "0") +
-        "m" +
-        deltaSecs.toString().padStart(2, "0") +
-        "s";
-
-      setStatus(`${time} – 0 / ${game.numMines} mines flagged`);
-    };
-
-    updateTimer();
-    const id = setInterval(updateTimer, 1000);
+    const id = setInterval(() => {
+      if (startTime === undefined) return;
+      setTimeElapsed(performance.now() - startTime);
+    }, 1000);
     return () => {
       clearInterval(id);
     };
-  }, [startTime, game.numMines]);
+  }, [startTime]);
 
   const onFieldClick = (e: MouseEvent) => {
     const target = e.target;
@@ -46,6 +34,13 @@ export function App({ game }: { game: Game }) {
     });
     setStartTime(performance.now());
   };
+
+  let status;
+  if (startTime === undefined) {
+    status = "Waiting for first click";
+  } else {
+    status = `${formatDuration(timeElapsed)} – 0 / ${game.numMines} flagged`;
+  }
 
   return (
     <>
@@ -71,7 +66,7 @@ export function App({ game }: { game: Game }) {
 
         <output>
           <strong className="pill-blue">STATUS</strong>
-          <span id="status-line">{status}</span>
+          <span>{status}</span>
         </output>
 
         <a href="/instructions.html">Instructions</a>
@@ -98,4 +93,16 @@ function generateField(rows: number, columns: number): JSX.Element[] {
   }
 
   return result;
+}
+
+function formatDuration(duration: number): string {
+  const deltaMins = Math.floor(duration / 60_000);
+  const deltaSecs = Math.floor((duration - deltaMins * 60_000) / 1000);
+
+  return (
+    deltaMins.toString().padStart(1, "0") +
+    "m" +
+    deltaSecs.toString().padStart(2, "0") +
+    "s"
+  );
 }

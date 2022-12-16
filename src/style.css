@@ -2,7 +2,7 @@
   font-family: "Work Sans";
   src: url("/WorkSans-Regular-v1.woff2") format("woff2"),
     url("/WorkSans-Regular-v1.woff") format("woff");
-  font-weight: normal;
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
@@ -11,7 +11,7 @@
   font-family: "Work Sans";
   src: url("/WorkSans-Bold-v1.woff2") format("woff2"),
     url("/WorkSans-Bold-v1.woff") format("woff");
-  font-weight: bold;
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -103,7 +103,7 @@ header {
 
 h1 {
   font-size: var(--step-2);
-  font-weight: bolder;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -196,7 +196,7 @@ output {
 .pill-blue {
   display: block;
   padding: 0.33ex 0.75rem;
-  font-weight: normal;
+  font-weight: inherit;
   font-feature-settings: "c2sc";
   letter-spacing: 0.05ch;
   background-color: #10243e;
