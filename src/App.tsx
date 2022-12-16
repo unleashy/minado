@@ -35,13 +35,6 @@ export function App({ game }: { game: Game }) {
     setStartTime(performance.now());
   };
 
-  let status;
-  if (startTime === undefined) {
-    status = "Waiting for first click";
-  } else {
-    status = `${formatDuration(timeElapsed)} – 0 / ${game.numMines} flagged`;
-  }
-
   return (
     <>
       <header>
@@ -61,38 +54,36 @@ export function App({ game }: { game: Game }) {
           }}
           onClick={onFieldClick}
         >
-          {...generateField(game.rows, game.columns)}
+          {game.cellsByRow.map((row, i) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <div key={i}>
+              {row.map(({ pos }) => (
+                <button
+                  key={pos.x}
+                  type="button"
+                  data-pos-x={pos.x}
+                  data-pos-y={pos.y}
+                >
+                  &nbsp;
+                </button>
+              ))}
+            </div>
+          ))}
         </div>
 
         <output>
           <strong className="pill-blue">STATUS</strong>
-          <span>{status}</span>
+          <span>
+            {startTime === undefined
+              ? "Waiting for first click"
+              : `${formatDuration(timeElapsed)} – 0 / ${game.numMines} flagged`}
+          </span>
         </output>
 
         <a href="/instructions.html">Instructions</a>
       </main>
     </>
   );
-}
-
-function generateField(rows: number, columns: number): JSX.Element[] {
-  const result = [];
-
-  for (let y = 0; y < rows; ++y) {
-    const row = [];
-
-    for (let x = 0; x < columns; ++x) {
-      row.push(
-        <button key={x} type="button" data-pos-x={x} data-pos-y={y}>
-          &nbsp;
-        </button>
-      );
-    }
-
-    result.push(<div key={y}>{row}</div>);
-  }
-
-  return result;
 }
 
 function formatDuration(duration: number): string {
