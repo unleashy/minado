@@ -1,41 +1,47 @@
 import type { Position } from "./position";
-
-export type CellOpen = { isOpen: true; hasMine: boolean };
-export type CellClosed = { isOpen: false; hasMine: boolean; hasFlag: boolean };
-
-export type Cell = CellOpen | CellClosed;
-export type CellWithPosition = Cell & { pos: Position };
+import type { CellWithPosition } from "./cell";
+import { type Field } from "./field";
 
 export class Game {
-  private readonly field: Cell[];
+  private readonly eventHandlers = {
+    start: [] as Array<() => void>,
+    open: [] as Array<(pos: Position) => void>
+  };
 
-  constructor(
-    readonly rows: number,
-    readonly columns: number,
-    readonly numMines: number
-  ) {
-    this.field = Array.from({ length: rows * columns }).map(() => ({
-      isOpen: false,
-      hasMine: false,
-      hasFlag: false
-    }));
+  constructor(readonly field: Field) {}
+
+  on(type: "start", handler: () => void): void;
+  on(type: "open", handler: (pos: Position) => void): void;
+  on(
+    type: "start" | "open",
+    handler: (() => void) | ((pos: Position) => void)
+  ): void {
+    (this.eventHandlers[type] as Array<typeof handler>).push(handler);
   }
 
-  openCell(pos: Position) {
-    // TODO
+  openCell(pos: Position): void {
+    for (const handler of this.eventHandlers.start) {
+      handler();
+    }
+
+    for (const handler of this.eventHandlers.open) {
+      handler(pos);
+    }
   }
 
   get cellsByRow(): CellWithPosition[][] {
-    const result = [];
+    return this.field.byRow;
+  }
 
-    for (let y = 0; y < this.rows; ++y) {
-      result.push(
-        this.field
-          .slice(y * this.rows, y * this.rows + this.columns)
-          .map((cell, x) => ({ ...cell, pos: { x, y } }))
-      );
-    }
+  get rows(): number {
+    return this.field.rows;
+  }
 
-    return result;
+  get columns(): number {
+    return this.field.columns;
+  }
+
+  get numMines(): number {
+    return this.field.numMines;
   }
 }
