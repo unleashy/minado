@@ -123,6 +123,7 @@ main {
 #field {
   --field-rows: 5;
   --field-cols: 5;
+  --cell-corner-radius: 0.15rem;
 
   display: grid;
   grid-template-rows: repeat(var(--field-rows), 3ch);
@@ -130,9 +131,11 @@ main {
   gap: 1px;
 }
 
-#field button {
-  --cell-corner-radius: 0.15rem;
+#field > * {
+  display: contents;
+}
 
+#field button {
   background-color: #eeeeec;
 }
 
@@ -145,19 +148,19 @@ main {
   background-color: #c8c7c1;
 }
 
-#field button[data-corner="top-left"] {
+#field > *:first-child > *:first-child {
   border-top-left-radius: var(--cell-corner-radius);
 }
 
-#field button[data-corner="top-right"] {
+#field > *:first-child > *:last-child {
   border-top-right-radius: var(--cell-corner-radius);
 }
 
-#field button[data-corner="bottom-left"] {
+#field > *:last-child > *:first-child {
   border-bottom-left-radius: var(--cell-corner-radius);
 }
 
-#field button[data-corner="bottom-right"] {
+#field > *:last-child > *:last-child {
   border-bottom-right-radius: var(--cell-corner-radius);
 }
 

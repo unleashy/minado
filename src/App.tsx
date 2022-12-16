@@ -1,6 +1,5 @@
 import { type MouseEvent, useEffect, useState } from "react";
 import { type Game } from "./game";
-import { type Position } from "./position";
 
 export function App({ game }: { game: Game }) {
   const [status, setStatus] = useState("Loading...");
@@ -85,41 +84,18 @@ function generateField(rows: number, columns: number): JSX.Element[] {
   const result = [];
 
   for (let y = 0; y < rows; ++y) {
+    const row = [];
+
     for (let x = 0; x < columns; ++x) {
-      result.push(
-        <button
-          key={y * columns + x}
-          type="button"
-          data-pos-x={x}
-          data-pos-y={y}
-          data-corner={getCorner({ x, y }, rows, columns)}
-        >
+      row.push(
+        <button key={x} type="button" data-pos-x={x} data-pos-y={y}>
           &nbsp;
         </button>
       );
     }
+
+    result.push(<div key={y}>{row}</div>);
   }
 
   return result;
-}
-
-type Corner = "top-left" | "top-right" | "bottom-left" | "bottom-right";
-
-// eslint-disable-next-line complexity
-function getCorner(
-  { x, y }: Position,
-  rows: number,
-  columns: number
-): Corner | undefined {
-  if (x === 0 && y === 0) {
-    return "top-left";
-  } else if (x === columns - 1 && y === 0) {
-    return "top-right";
-  } else if (x === 0 && y === rows - 1) {
-    return "bottom-left";
-  } else if (x === columns - 1 && y === rows - 1) {
-    return "bottom-right";
-  } else {
-    return undefined;
-  }
 }
