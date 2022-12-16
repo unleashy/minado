@@ -1,3 +1,21 @@
+@font-face {
+  font-family: "Work Sans";
+  src: url("/WorkSans-Regular-v1.woff2") format("woff2"),
+    url("/WorkSans-Regular-v1.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Work Sans";
+  src: url("/WorkSans-Bold-v1.woff2") format("woff2"),
+    url("/WorkSans-Bold-v1.woff") format("woff");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --step--1: clamp(0.7rem, calc(0.67rem + 0.15vw), 0.8rem);
   --step-0: clamp(0.88rem, calc(0.84rem + 0.19vw), 1rem);
@@ -171,14 +189,16 @@ output {
   align-items: baseline;
   justify-content: center;
   gap: 1rem;
+
+  font-feature-settings: "tnum";
 }
 
 .pill-blue {
   display: block;
-  padding: 1.1ex 0.75rem 0.8ex;
-
-  font-size: var(--step--1);
-  font-weight: bold;
+  padding: 0.33ex 0.75rem;
+  font-weight: normal;
+  font-feature-settings: "c2sc";
+  letter-spacing: 0.05ch;
   background-color: #10243e;
   border-radius: 1rem;
 }
