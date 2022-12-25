@@ -144,9 +144,11 @@ main {
   --cell-corner-radius: 0.15rem;
 
   display: grid;
-  grid-template-rows: repeat(var(--field-rows), 3ch);
-  grid-template-columns: repeat(var(--field-cols), 3ch);
-  gap: 1px;
+  grid-template-rows: repeat(var(--field-rows), 2rem);
+  grid-template-columns: repeat(var(--field-cols), 2rem);
+  gap: 0;
+
+  font-size: 1.5rem;
 }
 
 #field > * {
@@ -155,6 +157,8 @@ main {
 
 #field button {
   background-color: #eeeeec;
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px white,
+    inset -2px -2px #808080, inset 2px 2px #dfdfdf;
 }
 
 #field button:hover,
@@ -164,23 +168,13 @@ main {
 
 #field button:active,
 #field button[data-open="true"] {
-  background-color: #c8c7c1;
+  background-color: #dad7d0;
+  box-shadow: inset 1px 1px #808080;
 }
 
-#field > *:first-child > *:first-child {
-  border-top-left-radius: var(--cell-corner-radius);
-}
-
-#field > *:first-child > *:last-child {
-  border-top-right-radius: var(--cell-corner-radius);
-}
-
-#field > *:last-child > *:first-child {
-  border-bottom-left-radius: var(--cell-corner-radius);
-}
-
-#field > *:last-child > *:last-child {
-  border-bottom-right-radius: var(--cell-corner-radius);
+#field button:last-child:active,
+#field button:last-child[data-open="true"] {
+  box-shadow: inset 1px 1px #808080, inset -1px 0 #161615;
 }
 
 output {
