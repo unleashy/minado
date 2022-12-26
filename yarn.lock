@@ -2205,6 +2205,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"immer@npm:^9.0.16":
+  version: 9.0.16
+  resolution: "immer@npm:9.0.16"
+  checksum: e9a5ca65c929b329da7a3b7beccf7984271cda7bdd47b2cab619eac3277dcd56598c211b55cc340786b6eff0c06652ac018808d9fd744443f06882364dece6bc
+  languageName: node
+  linkType: hard
+
 "import-fresh@npm:^3.0.0, import-fresh@npm:^3.2.1":
   version: 3.3.0
   resolution: "import-fresh@npm:3.3.0"
@@ -2703,6 +2710,7 @@ __metadata:
     eslint-plugin-react: ^7.31.11
     eslint-plugin-react-hooks: ^4.6.0
     eslint-plugin-unicorn: ^45.0.2
+    immer: ^9.0.16
     prettier: ^2.8.1
     react: ^18.2.0
     react-dom: ^18.2.0

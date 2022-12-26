@@ -42,6 +42,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-react", "virtual:4e2207979e5993174cd92aef4c3542c9115a701adbad0a93a21481d039a74f58eb46224cbac499e40b4da629bb4e95da79ed5be18b48bc714f99052235fdfb40#npm:7.31.11"],\
             ["eslint-plugin-react-hooks", "virtual:4e2207979e5993174cd92aef4c3542c9115a701adbad0a93a21481d039a74f58eb46224cbac499e40b4da629bb4e95da79ed5be18b48bc714f99052235fdfb40#npm:4.6.0"],\
             ["eslint-plugin-unicorn", "virtual:4e2207979e5993174cd92aef4c3542c9115a701adbad0a93a21481d039a74f58eb46224cbac499e40b4da629bb4e95da79ed5be18b48bc714f99052235fdfb40#npm:45.0.2"],\
+            ["immer", "npm:9.0.16"],\
             ["prettier", "npm:2.8.1"],\
             ["react", "npm:18.2.0"],\
             ["react-dom", "virtual:4e2207979e5993174cd92aef4c3542c9115a701adbad0a93a21481d039a74f58eb46224cbac499e40b4da629bb4e95da79ed5be18b48bc714f99052235fdfb40#npm:18.2.0"],\
@@ -2740,6 +2741,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["immer", [\
+        ["npm:9.0.16", {\
+          "packageLocation": "./.yarn/cache/immer-npm-9.0.16-426ac657bc-e9a5ca65c9.zip/node_modules/immer/",\
+          "packageDependencies": [\
+            ["immer", "npm:9.0.16"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["import-fresh", [\
         ["npm:3.3.0", {\
           "packageLocation": "./.yarn/cache/import-fresh-npm-3.3.0-3e34265ca9-2cacfad06e.zip/node_modules/import-fresh/",\
@@ -3305,6 +3315,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["eslint-plugin-react", "virtual:4e2207979e5993174cd92aef4c3542c9115a701adbad0a93a21481d039a74f58eb46224cbac499e40b4da629bb4e95da79ed5be18b48bc714f99052235fdfb40#npm:7.31.11"],\
             ["eslint-plugin-react-hooks", "virtual:4e2207979e5993174cd92aef4c3542c9115a701adbad0a93a21481d039a74f58eb46224cbac499e40b4da629bb4e95da79ed5be18b48bc714f99052235fdfb40#npm:4.6.0"],\
             ["eslint-plugin-unicorn", "virtual:4e2207979e5993174cd92aef4c3542c9115a701adbad0a93a21481d039a74f58eb46224cbac499e40b4da629bb4e95da79ed5be18b48bc714f99052235fdfb40#npm:45.0.2"],\
+            ["immer", "npm:9.0.16"],\
             ["prettier", "npm:2.8.1"],\
             ["react", "npm:18.2.0"],\
             ["react-dom", "virtual:4e2207979e5993174cd92aef4c3542c9115a701adbad0a93a21481d039a74f58eb46224cbac499e40b4da629bb4e95da79ed5be18b48bc714f99052235fdfb40#npm:18.2.0"],\

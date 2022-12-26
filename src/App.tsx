@@ -1,9 +1,30 @@
-import { useEffect, useState } from "react";
-import { type Cell } from "./cell";
-import { type Position } from "./position";
+import { useCallback, useEffect, useState } from "react";
+import produce, { type Draft } from "immer";
+import { type Cell, type Dimensions, type Position } from "./cell";
+
+type Field = {
+  field: Cell[][];
+  dimensions: Dimensions;
+};
 
 export function App() {
-  const [startTime, timeElapsed, startTimer] = useTimer();
+  const [hasStarted, timeElapsed, startTimer] = useTimer();
+  const [field, setField] = useState(() =>
+    genEmptyField({ rows: 5, columns: 5 })
+  );
+  const onCellClick = useCallback(
+    (pos: Position) => {
+      if (hasStarted) {
+        setField(openCell(field, pos));
+      } else {
+        startTimer();
+        setField(genField(field.dimensions, pos));
+      }
+    },
+    // "startTimer" has a stable identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hasStarted, field]
+  );
 
   return (
     <>
@@ -16,20 +37,14 @@ export function App() {
       </header>
 
       <main>
-        <Field
-          rows={5}
-          columns={5}
-          onClick={() => {
-            startTimer();
-          }}
-        />
+        <FieldView field={field} onClick={onCellClick} />
 
         <output>
           <strong className="pill-blue">STATUS</strong>
           <span>
-            {startTime === undefined
-              ? "Waiting for first click"
-              : `${formatDuration(timeElapsed)} – 0 / 0 flagged`}
+            {hasStarted
+              ? `${formatDuration(timeElapsed)} – 0 / 0 flagged`
+              : "Waiting for first click"}
           </span>
         </output>
 
@@ -37,6 +52,27 @@ export function App() {
       </main>
     </>
   );
+}
+
+function genEmptyField(dimensions: Dimensions): Field {
+  return {
+    field: Array.from({ length: dimensions.rows }).map(() =>
+      Array.from({ length: dimensions.columns }).map(() => ({
+        isOpen: false,
+        hasMine: false,
+        hasFlag: false
+      }))
+    ),
+    dimensions
+  };
+}
+
+const openCell = produce(({ field }: Draft<Field>, pos: Position) => {
+  field[pos.y][pos.x].isOpen = true;
+});
+
+function genField(dimensions: Dimensions, initialOpenCell: Position): Field {
+  return openCell(genEmptyField(dimensions), initialOpenCell);
 }
 
 function formatDuration(duration: number): string {
@@ -53,45 +89,37 @@ function formatDuration(duration: number): string {
 
 function useTimer() {
   const [startTime, setStartTime] = useState<number | undefined>();
-  const startTimer = () => {
-    if (startTime === undefined) {
-      setStartTime(performance.now());
-    }
-  };
-
   const [timeElapsed, setTimeElapsed] = useState(0);
   useEffect(() => {
-    if (startTime === undefined) {
-      setTimeElapsed(0);
-      return;
-    }
-
     const id = setInterval(() => {
       if (startTime === undefined) return;
       setTimeElapsed(performance.now() - startTime);
     }, 1000);
+
     return () => {
       clearInterval(id);
     };
   }, [startTime]);
 
-  return [startTime, timeElapsed, startTimer] as const;
+  return [
+    startTime !== undefined,
+    timeElapsed,
+    useCallback(() => {
+      setStartTime(performance.now());
+    }, [])
+  ] as const;
 }
 
-function Field({
-  rows,
-  columns,
+function FieldView({
+  field: {
+    field,
+    dimensions: { rows, columns }
+  },
   onClick
 }: {
-  rows: number;
-  columns: number;
+  field: Field;
   onClick: (pos: Position) => void;
 }) {
-  const [field, setField] = useState<Cell[][]>(() => genField(rows, columns));
-  useEffect(() => {
-    setField(genField(rows, columns));
-  }, [rows, columns]);
-
   return (
     <div
       id="field"
@@ -106,13 +134,10 @@ function Field({
         }
 
         e.preventDefault();
-
-        const pos: Position = {
+        onClick({
           x: Number(target.dataset["posX"]),
           y: Number(target.dataset["posY"])
-        };
-
-        onClick(pos);
+        });
       }}
     >
       {field.map((row, y) => (
@@ -133,15 +158,5 @@ function Field({
         </div>
       ))}
     </div>
-  );
-}
-
-function genField(rows: number, columns: number): Cell[][] {
-  return Array.from({ length: rows }).map(() =>
-    Array.from({ length: columns }).map(() => ({
-      isOpen: false,
-      hasMine: false,
-      hasFlag: false
-    }))
   );
 }
