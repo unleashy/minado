@@ -156,8 +156,9 @@ main {
 }
 
 #field button {
+  color: #161615;
   background-color: #eeeeec;
-  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px white,
+  box-shadow: inset -1px -1px #808080, inset 1px 1px white,
     inset -2px -2px #808080, inset 2px 2px #dfdfdf;
 }
 

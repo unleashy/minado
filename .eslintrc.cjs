@@ -55,7 +55,7 @@ module.exports = {
     "unicorn/filename-case": "off",
 
     // allow things like 0 <= x && x <= 10
-    yoda: ["error", "never", { exceptRange: true }]
+    yoda: "off"
   },
   overrides: [
     {

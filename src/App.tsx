@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import produce, { type Draft } from "immer";
-import { type Cell, type Dimensions, type Position } from "./cell";
-
-type Field = {
-  field: Cell[][];
-  dimensions: Dimensions;
-};
+import { Random } from "./random";
+import { type Position } from "./measures";
+import { type Field, genEmptyField, genField, openCell } from "./field";
 
 export function App() {
   const [hasStarted, timeElapsed, startTimer] = useTimer();
@@ -13,12 +9,21 @@ export function App() {
     genEmptyField({ rows: 5, columns: 5 })
   );
   const onCellClick = useCallback(
-    (pos: Position) => {
+    (cellPos: Position) => {
       if (hasStarted) {
-        setField(openCell(field, pos));
+        setField(openCell(field, cellPos));
       } else {
         startTimer();
-        setField(genField(field.dimensions, pos));
+        setField(
+          openCell(
+            genField(
+              { dimensions: field.dimensions, numMines: 5 },
+              cellPos,
+              new Random()
+            ),
+            cellPos
+          )
+        );
       }
     },
     // "startTimer" has a stable identity.
@@ -43,7 +48,7 @@ export function App() {
           <strong className="pill-blue">STATUS</strong>
           <span>
             {hasStarted
-              ? `${formatDuration(timeElapsed)} – 0 / 0 flagged`
+              ? `${formatDuration(timeElapsed)} – 0 / ${field.numMines} flagged`
               : "Waiting for first click"}
           </span>
         </output>
@@ -52,27 +57,6 @@ export function App() {
       </main>
     </>
   );
-}
-
-function genEmptyField(dimensions: Dimensions): Field {
-  return {
-    field: Array.from({ length: dimensions.rows }).map(() =>
-      Array.from({ length: dimensions.columns }).map(() => ({
-        isOpen: false,
-        hasMine: false,
-        hasFlag: false
-      }))
-    ),
-    dimensions
-  };
-}
-
-const openCell = produce(({ field }: Draft<Field>, pos: Position) => {
-  field[pos.y][pos.x].isOpen = true;
-});
-
-function genField(dimensions: Dimensions, initialOpenCell: Position): Field {
-  return openCell(genEmptyField(dimensions), initialOpenCell);
 }
 
 function formatDuration(duration: number): string {
@@ -143,7 +127,7 @@ function FieldView({
       {field.map((row, y) => (
         // eslint-disable-next-line react/no-array-index-key
         <div key={y}>
-          {row.map(({ isOpen }, x) => (
+          {row.map(({ isOpen, hasMine }, x) => (
             <button
               // eslint-disable-next-line react/no-array-index-key
               key={y * rows + x}
@@ -152,7 +136,7 @@ function FieldView({
               data-pos-y={y}
               data-open={isOpen}
             >
-              &nbsp;
+              {hasMine ? "M" : "\u00A0"}
             </button>
           ))}
         </div>
