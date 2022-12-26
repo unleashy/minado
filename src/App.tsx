@@ -1,7 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import {
+  type ButtonHTMLAttributes,
+  useCallback,
+  useEffect,
+  useState
+} from "react";
 import { Random } from "./random";
 import { type Position } from "./measures";
 import { type Field, genEmptyField, genField, openCell } from "./field";
+import { type Cell } from "./cell";
 
 export function App() {
   const [hasStarted, timeElapsed, startTimer] = useTimer();
@@ -128,23 +134,38 @@ function FieldView({
         // eslint-disable-next-line react/no-array-index-key
         <div key={y}>
           {row.map((cell, x) => (
-            <button
-              // eslint-disable-next-line react/no-array-index-key
-              key={y * rows + x}
-              type="button"
-              data-pos-x={x}
-              data-pos-y={y}
-              data-open={cell.isOpen}
-            >
-              {cell.hasMine
-                ? "M"
-                : cell.adjacentMines > 0
-                ? cell.adjacentMines
-                : "\u00A0"}
-            </button>
+            // eslint-disable-next-line react/no-array-index-key
+            <CellButton key={y * rows + x} cell={cell} pos={{ x, y }} />
           ))}
         </div>
       ))}
     </div>
   );
+}
+
+type CellButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  "data-pos-x": number;
+  "data-pos-y": number;
+  "data-open": boolean;
+  "data-adjacency"?: number;
+};
+
+function CellButton({ cell, pos }: { cell: Cell; pos: Position }) {
+  const props: CellButtonProps = {
+    type: "button",
+    "data-pos-x": pos.x,
+    "data-pos-y": pos.y,
+    "data-open": cell.isOpen,
+    children: ""
+  };
+
+  if (cell.hasMine) {
+    props.children = "M";
+  } else {
+    props["data-adjacency"] = cell.adjacentMines;
+    props.children = cell.adjacentMines > 0 ? cell.adjacentMines : "\u00A0";
+  }
+
+  // eslint-disable-next-line react/button-has-type
+  return <button {...props} />;
 }
