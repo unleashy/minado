@@ -1,4 +1,20 @@
-export type CellOpen = { isOpen: true; hasMine: boolean };
-export type CellClosed = { isOpen: false; hasMine: boolean; hasFlag: boolean };
+export type CellEmptyClosed = {
+  isOpen: false;
+  hasMine: false;
+  hasFlag: boolean;
+  adjacentMines: number;
+};
 
-export type Cell = CellOpen | CellClosed;
+export type CellEmptyOpen = {
+  isOpen: true;
+  hasMine: false;
+  adjacentMines: number;
+};
+
+export type CellMine = {
+  isOpen: false;
+  hasMine: true;
+  hasFlag: boolean;
+};
+
+export type Cell = CellEmptyClosed | CellEmptyOpen | CellMine;

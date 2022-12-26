@@ -17,7 +17,7 @@ export function App() {
         setField(
           openCell(
             genField(
-              { dimensions: field.dimensions, numMines: 5 },
+              { dimensions: field.dimensions, numMines: 4 },
               cellPos,
               new Random()
             ),
@@ -127,16 +127,20 @@ function FieldView({
       {field.map((row, y) => (
         // eslint-disable-next-line react/no-array-index-key
         <div key={y}>
-          {row.map(({ isOpen, hasMine }, x) => (
+          {row.map((cell, x) => (
             <button
               // eslint-disable-next-line react/no-array-index-key
               key={y * rows + x}
               type="button"
               data-pos-x={x}
               data-pos-y={y}
-              data-open={isOpen}
+              data-open={cell.isOpen}
             >
-              {hasMine ? "M" : "\u00A0"}
+              {cell.hasMine
+                ? "M"
+                : cell.adjacentMines > 0
+                ? cell.adjacentMines
+                : "\u00A0"}
             </button>
           ))}
         </div>

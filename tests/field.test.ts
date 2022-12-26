@@ -8,196 +8,36 @@ test("genEmptyField generates an empty field", () => {
   const dimensions: Dimensions = { rows: 2, columns: 2 };
   const field = genEmptyField(dimensions);
 
-  expect(field).toMatchInlineSnapshot(`
-    {
-      "dimensions": {
-        "columns": 2,
-        "rows": 2,
-      },
-      "field": [
-        [
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-        ],
-        [
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-        ],
-      ],
-      "numMines": 0,
-    }
-  `);
+  const fieldPicture = field.field.map((row) =>
+    row.map((cell) => (cell.hasMine ? "X" : cell.isOpen ? "X" : " ")).join("")
+  );
+  // prettier-ignore
+  expect(fieldPicture).toEqual([
+    "  ",
+    "  "
+  ]);
 });
 
 test("genField generates a field with randomly placed mines", () => {
-  const dimensions: Dimensions = { rows: 5, columns: 5 };
-  const numMines = 5;
+  const dimensions: Dimensions = { rows: 5, columns: 10 };
+  const numMines = 8;
   const safeCell: Position = { x: 2, y: 2 };
-  const random = new Random(0);
+  const random = new Random(1);
+
   const field = genField({ dimensions, numMines }, safeCell, random);
 
-  expect(field).toMatchInlineSnapshot(`
-    {
-      "dimensions": {
-        "columns": 5,
-        "rows": 5,
-      },
-      "field": [
-        [
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": true,
-            "isOpen": false,
-          },
-        ],
-        [
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-        ],
-        [
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": true,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": true,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": true,
-            "isOpen": false,
-          },
-        ],
-        [
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": true,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-        ],
-        [
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-          {
-            "hasFlag": false,
-            "hasMine": false,
-            "isOpen": false,
-          },
-        ],
-      ],
-      "numMines": 5,
-    }
-  `);
+  const fieldPicture = field.field.map((row) =>
+    row
+      .map((cell) => (cell.hasMine ? "M" : cell.adjacentMines.toString()))
+      .join("")
+  );
+  expect(fieldPicture).toEqual([
+    "001M2102M2",
+    "0023M213M3",
+    "001M33M22M",
+    "0012M21111",
+    "0001110000"
+  ]);
 });
 
 test("openCell opens an unopened cell", () => {

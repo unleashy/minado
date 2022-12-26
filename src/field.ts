@@ -1,6 +1,6 @@
 import produce, { type Draft } from "immer";
 import { type Dimensions, type Position } from "./measures";
-import { type Cell } from "./cell";
+import { type Cell, type CellMine } from "./cell";
 import { type Random } from "./random";
 
 export type Field = {
@@ -9,22 +9,16 @@ export type Field = {
   numMines: number;
 };
 
-export function genEmptyField({ rows, columns }: Dimensions): Field {
+export function genEmptyField(dimensions: Dimensions): Field {
   return {
-    field: Array.from({ length: rows }).map(() =>
-      Array.from({ length: columns }).map(() => ({
-        isOpen: false,
-        hasMine: false,
-        hasFlag: false
-      }))
-    ),
-    dimensions: { rows, columns },
+    field: buildFieldArray(dimensions),
+    dimensions,
     numMines: 0
   };
 }
 
 export function genField(
-  { dimensions, numMines }: { dimensions: Dimensions; numMines: number },
+  { dimensions, numMines }: Omit<Field, "field">,
   safeCell: Position,
   random: Random
 ): Field {
@@ -38,37 +32,75 @@ export function genField(
     );
   }
 
-  // 1. Create a field
-  const field = buildFieldArray(dimensions);
+  const field: Field = {
+    field: buildFieldArray(dimensions),
+    dimensions,
+    numMines
+  };
+  randomlyPlaceMines(field, safeCell, random);
+  setAdjacentMineCount(field);
+  return field;
+}
 
-  // 2. Randomly cover the field with mines, up to numMines
+function randomlyPlaceMines(
+  { field, dimensions, numMines }: Field,
+  safeCell: Position,
+  random: Random
+) {
   const mustBeSafe = (pos: Position) =>
     pos.x === safeCell.x && pos.y === safeCell.y;
-  const hasMine = (pos: Position) => at(field, pos).hasMine;
+  const hasMine = (pos: Position) => getCell(field, pos).hasMine;
 
   let minesPlaced = 0;
   while (minesPlaced < numMines) {
     const minePos: Position = {
-      x: random.between(0, dimensions.rows),
-      y: random.between(0, dimensions.columns)
+      x: random.between(0, dimensions.columns),
+      y: random.between(0, dimensions.rows)
     };
     if (mustBeSafe(minePos) || hasMine(minePos)) {
       continue;
     }
 
-    at(field, minePos).hasMine = true;
+    const mine: CellMine = {
+      isOpen: false,
+      hasMine: true,
+      hasFlag: false
+    };
+
+    setCell(field, minePos, mine);
     ++minesPlaced;
   }
+}
 
-  // 3. Assign each cell a number according to the mines adjacent to it
-  // TODO
+function setAdjacentMineCount({ field, dimensions: { rows, columns } }: Field) {
+  for (let y = 0; y < rows; ++y) {
+    for (let x = 0; x < columns; ++x) {
+      const pos: Position = { x, y };
+      const cell = getCell(field, pos);
+      if (!cell.hasMine) {
+        cell.adjacentMines = numAdjacentMines(field, pos);
+      }
+    }
+  }
+}
 
-  // 4. Finish
-  return { field, dimensions, numMines };
+function numAdjacentMines(field: Cell[][], pos: Position): number {
+  const adjacentCellPos: Position[] = [
+    { x: pos.x - 1, y: pos.y - 1 },
+    { x: pos.x - 1, y: pos.y },
+    { x: pos.x - 1, y: pos.y + 1 },
+    { x: pos.x, y: pos.y - 1 },
+    { x: pos.x, y: pos.y + 1 },
+    { x: pos.x + 1, y: pos.y - 1 },
+    { x: pos.x + 1, y: pos.y },
+    { x: pos.x + 1, y: pos.y + 1 }
+  ];
+
+  return adjacentCellPos.filter((pos) => getCell(field, pos)?.hasMine).length;
 }
 
 export const openCell = produce(({ field }: Draft<Field>, pos: Position) => {
-  at(field, pos).isOpen = true;
+  getCell(field, pos).isOpen = true;
 });
 
 function buildFieldArray({ rows, columns }: Dimensions): Cell[][] {
@@ -76,11 +108,16 @@ function buildFieldArray({ rows, columns }: Dimensions): Cell[][] {
     Array.from({ length: columns }).map(() => ({
       isOpen: false,
       hasMine: false,
-      hasFlag: false
+      hasFlag: false,
+      adjacentMines: 0
     }))
   );
 }
 
-function at(field: Cell[][], pos: Position): Cell {
-  return field[pos.y][pos.x];
+function getCell(field: Cell[][], pos: Position): Cell {
+  return field[pos.y]?.[pos.x];
+}
+
+function setCell(field: Cell[][], pos: Position, cell: Cell) {
+  field[pos.y][pos.x] = cell;
 }
