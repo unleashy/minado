@@ -1,5 +1,5 @@
 import produce, { type Draft } from "immer";
-import { type Dimensions, type Position } from "./measures";
+import { areAdjacent, type Dimensions, type Position } from "./measures";
 import { type Cell, type CellMine } from "./cell";
 import { type Random } from "./random";
 
@@ -47,8 +47,7 @@ function randomlyPlaceMines(
   safeCell: Position,
   random: Random
 ) {
-  const mustBeSafe = (pos: Position) =>
-    pos.x === safeCell.x && pos.y === safeCell.y;
+  const mustBeSafe = (pos: Position) => areAdjacent(pos, safeCell);
   const hasMine = (pos: Position) => getCell(field, pos).hasMine;
 
   let minesPlaced = 0;
@@ -57,6 +56,7 @@ function randomlyPlaceMines(
       x: random.between(0, dimensions.columns),
       y: random.between(0, dimensions.rows)
     };
+
     if (mustBeSafe(minePos) || hasMine(minePos)) {
       continue;
     }
@@ -66,7 +66,6 @@ function randomlyPlaceMines(
       hasMine: true,
       hasFlag: false
     };
-
     setCell(field, minePos, mine);
     ++minesPlaced;
   }

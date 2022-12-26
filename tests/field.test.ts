@@ -1,8 +1,7 @@
 import { expect, test } from "vitest";
-import { type Dimensions, type Position } from "../src/measures";
-import { type Cell } from "../src/cell";
-import { genEmptyField, genField, openCell } from "../src/field";
 import { Random } from "../src/random";
+import { areAdjacent, type Dimensions, type Position } from "../src/measures";
+import { genEmptyField, genField, openCell } from "../src/field";
 
 test("genEmptyField generates an empty field", () => {
   const dimensions: Dimensions = { rows: 2, columns: 2 };
@@ -33,11 +32,29 @@ test("genField generates a field with randomly placed mines", () => {
   );
   expect(fieldPicture).toEqual([
     "001M2102M2",
-    "0023M213M3",
-    "001M33M22M",
-    "0012M21111",
-    "0001110000"
+    "0012M213M3",
+    "000223M22M",
+    "0001M32111",
+    "00012M1000"
   ]);
+});
+
+test("genField keeps an 8x8 area without mines around the safe cell", () => {
+  const dimensions: Dimensions = { rows: 5, columns: 5 };
+  const numMines = 5;
+  const safeCell: Position = { x: 1, y: 1 };
+  const random = new Random();
+
+  for (let i = 0; i < 100; ++i) {
+    const field = genField({ dimensions, numMines }, safeCell, random);
+
+    const minesPos = field.field.flatMap((row, y) =>
+      row.flatMap((cell, x): Position[] => (cell.hasMine ? [{ x, y }] : []))
+    );
+    expect(minesPos).toSatisfy((minesPos: Position[]) =>
+      minesPos.every((pos) => !areAdjacent(pos, safeCell))
+    );
+  }
 });
 
 test("openCell opens an unopened cell", () => {
