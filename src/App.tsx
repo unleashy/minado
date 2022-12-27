@@ -1,5 +1,6 @@
 import {
   type ButtonHTMLAttributes,
+  type MouseEvent,
   useCallback,
   useEffect,
   useState
@@ -10,10 +11,18 @@ import { type Field, genEmptyField, genField, openCell } from "./field";
 import { type Cell } from "./cell";
 
 export function App() {
-  const [hasStarted, timeElapsed, startTimer] = useTimer();
+  const [hasStarted, timeElapsedMs, startTimer, resetTimer] = useTimer();
   const [field, setField] = useState(() =>
     genEmptyField({ rows: 5, columns: 5 })
   );
+
+  const newGame = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    setField(genEmptyField({ rows: 5, columns: 5 }));
+    resetTimer();
+  };
+
   const onCellClick = useCallback(
     (cellPos: Position) => {
       if (hasStarted) {
@@ -42,7 +51,9 @@ export function App() {
       <header>
         <h1>Minado</h1>
         <nav>
-          <button type="button">New game</button>
+          <button type="button" onClick={newGame}>
+            New game
+          </button>
           <button type="button">Customise game</button>
         </nav>
       </header>
@@ -54,7 +65,9 @@ export function App() {
           <strong className="pill-blue">STATUS</strong>
           <span>
             {hasStarted
-              ? `${formatDuration(timeElapsed)} – 0 / ${field.numMines} flagged`
+              ? `${formatDuration(timeElapsedMs)} – 0 / ${
+                  field.numMines
+                } flagged`
               : "Waiting for first click"}
           </span>
         </output>
@@ -65,9 +78,9 @@ export function App() {
   );
 }
 
-function formatDuration(duration: number): string {
-  const deltaMins = Math.floor(duration / 60_000);
-  const deltaSecs = Math.floor((duration - deltaMins * 60_000) / 1000);
+function formatDuration(durationMs: number): string {
+  const deltaMins = Math.floor(durationMs / 60_000);
+  const deltaSecs = Math.floor((durationMs - deltaMins * 60_000) / 1000);
 
   return (
     deltaMins.toString().padStart(1, "0") +
@@ -81,8 +94,12 @@ function useTimer() {
   const [startTime, setStartTime] = useState<number | undefined>();
   const [timeElapsed, setTimeElapsed] = useState(0);
   useEffect(() => {
+    if (startTime === undefined) {
+      setTimeElapsed(0);
+      return;
+    }
+
     const id = setInterval(() => {
-      if (startTime === undefined) return;
       setTimeElapsed(performance.now() - startTime);
     }, 1000);
 
@@ -96,6 +113,10 @@ function useTimer() {
     timeElapsed,
     useCallback(() => {
       setStartTime(performance.now());
+    }, []),
+    useCallback(() => {
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      setStartTime(undefined);
     }, [])
   ] as const;
 }
