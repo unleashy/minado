@@ -72,15 +72,15 @@ html {
 
   color: var(--text-colour);
   background-color: var(--page-bg);
+}
+
+body {
+  font-size: var(--step-0);
 
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
-}
-
-body {
-  font-size: var(--step-0);
 }
 
 #root {
