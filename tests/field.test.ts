@@ -57,9 +57,25 @@ test("genField keeps an 8x8 area without mines around the safe cell", () => {
   }
 });
 
-test("openCell opens an unopened cell", () => {
-  const field = genEmptyField({ rows: 3, columns: 3 });
+test("openCell opens reachable empty cells", () => {
+  const field = genField(
+    { dimensions: { rows: 5, columns: 5 }, numMines: 5 },
+    { x: 0, y: 0 },
+    new Random(4)
+  );
 
-  const pos: Position = { x: 1, y: 1 };
-  expect(openCell(field, pos).field[pos.y][pos.x].isOpen).toBe(true);
+  const pos: Position = { x: 2, y: 2 };
+  const newField = openCell(field, pos);
+
+  const fieldPicture = newField.field.map((row) =>
+    row.map((cell) => (cell.hasMine ? "M" : cell.isOpen ? "O" : "X")).join("")
+  );
+  // prettier-ignore
+  expect(fieldPicture).toEqual([
+    "XXXXX",
+    "XOMMM",
+    "XOOOO",
+    "MOOOO",
+    "MOOOO",
+  ]);
 });

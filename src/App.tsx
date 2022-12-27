@@ -7,19 +7,19 @@ import {
 } from "react";
 import { Random } from "./random";
 import { type Position } from "./measures";
-import { type Field, genEmptyField, genField, openCell } from "./field";
 import { type Cell } from "./cell";
+import { type Field, genEmptyField, genField, openCell } from "./field";
 
 export function App() {
   const [hasStarted, timeElapsedMs, startTimer, resetTimer] = useTimer();
   const [field, setField] = useState(() =>
-    genEmptyField({ rows: 5, columns: 5 })
+    genEmptyField({ rows: 9, columns: 9 })
   );
 
   const newGame = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    setField(genEmptyField({ rows: 5, columns: 5 }));
+    setField(genEmptyField({ rows: 9, columns: 9 }));
     resetTimer();
   };
 
@@ -32,7 +32,7 @@ export function App() {
         setField(
           openCell(
             genField(
-              { dimensions: field.dimensions, numMines: 4 },
+              { dimensions: field.dimensions, numMines: 10 },
               cellPos,
               new Random()
             ),

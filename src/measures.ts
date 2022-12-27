@@ -22,3 +22,28 @@ export function areAdjacent(a: Position, b: Position): boolean {
   // where x is our position, A is adjacent, and N is non-adjacent
   return Math.abs(b.x - a.x) <= 1 && Math.abs(b.y - a.y) <= 1;
 }
+
+export function* adjacentPositions(
+  pos: Position,
+  dimensions: Dimensions
+): Generator<Position> {
+  for (let dy = -1; dy <= 1; ++dy) {
+    for (let dx = -1; dx <= 1; ++dx) {
+      if (dy === 0 && dx === 0) continue;
+
+      const adjPos: Position = { x: pos.x + dx, y: pos.y + dy };
+      if (isInBounds(adjPos, dimensions)) {
+        yield adjPos;
+      }
+    }
+  }
+}
+
+function isInBounds(pos: Position, dimensions: Dimensions): boolean {
+  return (
+    0 <= pos.x &&
+    pos.x < dimensions.columns &&
+    0 <= pos.y &&
+    pos.y < dimensions.rows
+  );
+}
