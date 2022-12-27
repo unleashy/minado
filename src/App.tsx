@@ -135,7 +135,7 @@ function FieldView({
         <div key={y}>
           {row.map((cell, x) => (
             // eslint-disable-next-line react/no-array-index-key
-            <CellButton key={y * rows + x} cell={cell} pos={{ x, y }} />
+            <CellButton key={y * rows + x} cell={cell} x={x} y={y} />
           ))}
         </div>
       ))}
@@ -150,11 +150,11 @@ type CellButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   "data-adjacency"?: number;
 };
 
-function CellButton({ cell, pos }: { cell: Cell; pos: Position }) {
+function CellButton({ cell, x, y }: { cell: Cell; x: number; y: number }) {
   const props: CellButtonProps = {
     type: "button",
-    "data-pos-x": pos.x,
-    "data-pos-y": pos.y,
+    "data-pos-x": x,
+    "data-pos-y": y,
     "data-open": cell.isOpen,
     children: ""
   };
