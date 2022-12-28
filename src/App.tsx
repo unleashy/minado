@@ -177,14 +177,17 @@ function CellButton({ cell, x, y }: { cell: Cell; x: number; y: number }) {
     "data-pos-x": x,
     "data-pos-y": y,
     "data-open": cell.isOpen,
-    children: ""
+    children: "\u00A0" // non-breaking space
   };
 
   if (cell.hasMine) {
-    props.children = "M";
+    props.children = "💣";
   } else {
     props["data-adjacency"] = cell.adjacentMines;
-    props.children = cell.adjacentMines > 0 ? cell.adjacentMines : "\u00A0";
+
+    if (cell.adjacentMines > 0) {
+      props.children = cell.adjacentMines;
+    }
   }
 
   // eslint-disable-next-line react/button-has-type
