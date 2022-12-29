@@ -64,6 +64,29 @@ test("openCell opens reachable empty cells", () => {
     new Random(4)
   );
 
+  const pos: Position = { x: 2, y: 3 };
+  const newField = openCell(field, pos);
+
+  const fieldPicture = newField.field.map((row) =>
+    row.map((cell) => (cell.hasMine ? "M" : cell.isOpen ? "O" : "X")).join("")
+  );
+  // prettier-ignore
+  expect(fieldPicture).toEqual([
+    "XXXXX",
+    "XXMMM",
+    "XOOOO",
+    "MOOOO",
+    "MOOOO",
+  ]);
+});
+
+test("opening a cell with adjacent mines does not open any more cells", () => {
+  const field = genField(
+    { dimensions: { rows: 5, columns: 5 }, numMines: 5 },
+    { x: 0, y: 0 },
+    new Random(4)
+  );
+
   const pos: Position = { x: 2, y: 2 };
   const newField = openCell(field, pos);
 
@@ -73,10 +96,10 @@ test("openCell opens reachable empty cells", () => {
   // prettier-ignore
   expect(fieldPicture).toEqual([
     "XXXXX",
-    "XOMMM",
-    "XOOOO",
-    "MOOOO",
-    "MOOOO",
+    "XXMMM",
+    "XXOXX",
+    "MXXXX",
+    "MXXXX",
   ]);
 });
 

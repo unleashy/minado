@@ -5,7 +5,7 @@ import {
   type Dimensions,
   type Position
 } from "./measures";
-import { type Cell, CellEmptyClosed, type CellMine } from "./cell";
+import { type Cell, type CellEmptyClosed, type CellMine } from "./cell";
 import { type Random } from "./random";
 
 export type Field = {
@@ -131,18 +131,9 @@ export const openCell = produce(
         adjacentMines: cell.adjacentMines
       });
 
-      for (const adjacentPos of adjacentPositions(pos, dimensions)) {
-        const adjacentCell = getCell(field, adjacentPos)!;
-        if (adjacentCell.hasMine) continue;
-
-        if (hasNoAdjacentMines(adjacentCell)) {
+      if (cell.adjacentMines === 0) {
+        for (const adjacentPos of adjacentPositions(pos, dimensions)) {
           openCellRecursive(adjacentPos);
-        } else {
-          setCell(field, adjacentPos, {
-            isOpen: true,
-            hasMine: false,
-            adjacentMines: adjacentCell.adjacentMines
-          });
         }
       }
     }
