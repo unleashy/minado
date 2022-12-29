@@ -5,25 +5,27 @@ import {
   type Dimensions,
   type Position
 } from "./measures";
-import { type Cell, type CellMine } from "./cell";
+import { type Cell, CellEmptyClosed, type CellMine } from "./cell";
 import { type Random } from "./random";
 
 export type Field = {
   field: Cell[][];
   dimensions: Dimensions;
   numMines: number;
+  numFlags: number;
 };
 
 export function genEmptyField(dimensions: Dimensions): Field {
   return {
     field: buildFieldArray(dimensions),
     dimensions,
-    numMines: 0
+    numMines: 0,
+    numFlags: 0
   };
 }
 
 export function genField(
-  { dimensions, numMines }: Omit<Field, "field">,
+  { dimensions, numMines }: Omit<Field, "field" | "numFlags">,
   safeCell: Position,
   random: Random
 ): Field {
@@ -40,7 +42,8 @@ export function genField(
   const field: Field = {
     field: buildFieldArray(dimensions),
     dimensions,
-    numMines
+    numMines,
+    numFlags: 0
   };
   randomlyPlaceMines(field, safeCell, random);
   setAdjacentMineCount(field);
@@ -101,13 +104,24 @@ function hasMine(field: Cell[][], pos: Position): boolean {
   return getCell(field, pos)?.hasMine ?? false;
 }
 
+function buildFieldArray({ rows, columns }: Dimensions): Cell[][] {
+  return Array.from({ length: rows }).map(() =>
+    Array.from({ length: columns }).map(() => ({
+      isOpen: false,
+      hasMine: false,
+      hasFlag: false,
+      adjacentMines: 0
+    }))
+  );
+}
+
 export const openCell = produce(
   ({ field, dimensions }: Draft<Field>, pos: Position) => {
     openCellRecursive(pos);
 
     function openCellRecursive(pos: Position) {
       const cell = getCell(field, pos);
-      if (!cell || cell.isOpen || cell.hasMine) {
+      if (!(cell && isOpenable(cell))) {
         return;
       }
 
@@ -135,20 +149,27 @@ export const openCell = produce(
   }
 );
 
+function isOpenable(cell: Cell): cell is CellEmptyClosed {
+  return !(cell.isOpen || cell.hasFlag || cell.hasMine);
+}
+
 function hasNoAdjacentMines(adjacentCell: Cell): boolean {
   return !adjacentCell.hasMine && adjacentCell.adjacentMines === 0;
 }
 
-function buildFieldArray({ rows, columns }: Dimensions): Cell[][] {
-  return Array.from({ length: rows }).map(() =>
-    Array.from({ length: columns }).map(() => ({
-      isOpen: false,
-      hasMine: false,
-      hasFlag: false,
-      adjacentMines: 0
-    }))
-  );
-}
+export const toggleFlag = produce((draft: Draft<Field>, pos: Position) => {
+  const cell = getCell(draft.field, pos);
+  if (!cell || cell.isOpen) {
+    return;
+  }
+
+  cell.hasFlag = !cell.hasFlag;
+  if (cell.hasFlag) {
+    ++draft.numFlags;
+  } else {
+    --draft.numFlags;
+  }
+});
 
 function getCell(field: Cell[][], pos: Position): Cell | undefined {
   return field[pos.y]?.[pos.x];

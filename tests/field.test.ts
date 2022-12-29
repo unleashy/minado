@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { Random } from "../src/random";
 import { areAdjacent, type Dimensions, type Position } from "../src/measures";
-import { genEmptyField, genField, openCell } from "../src/field";
+import { genEmptyField, genField, openCell, toggleFlag } from "../src/field";
 
 test("genEmptyField generates an empty field", () => {
   const dimensions: Dimensions = { rows: 2, columns: 2 };
@@ -78,4 +78,30 @@ test("openCell opens reachable empty cells", () => {
     "MOOOO",
     "MOOOO",
   ]);
+});
+
+test("toggleFlag places/removes flags on closed cells", () => {
+  const field = genField(
+    { dimensions: { rows: 5, columns: 5 }, numMines: 5 },
+    { x: 0, y: 0 },
+    new Random(4)
+  );
+
+  const flaggedField = toggleFlag(field, { x: 4, y: 1 });
+
+  const fieldPicture = flaggedField.field.map((row) =>
+    row.map((cell) => (!cell.isOpen && cell.hasFlag ? "F" : "_")).join("")
+  );
+  // prettier-ignore
+  expect(fieldPicture).toEqual([
+    "_____",
+    "____F",
+    "_____",
+    "_____",
+    "_____",
+  ]);
+
+  const unflaggedField = toggleFlag(flaggedField, { x: 4, y: 1 });
+
+  expect(field).toEqual(unflaggedField);
 });

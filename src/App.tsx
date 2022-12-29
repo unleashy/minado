@@ -8,7 +8,13 @@ import {
 import { Random } from "./random";
 import { type Position } from "./measures";
 import { type Cell } from "./cell";
-import { type Field, genEmptyField, genField, openCell } from "./field";
+import {
+  type Field,
+  toggleFlag,
+  genEmptyField,
+  genField,
+  openCell
+} from "./field";
 
 export function App() {
   const [hasStarted, timeElapsedMs, startTimer, resetTimer] = useTimer();
@@ -23,7 +29,7 @@ export function App() {
     resetTimer();
   };
 
-  const onCellClick = useCallback(
+  const onOpenCell = useCallback(
     (cellPos: Position) => {
       if (hasStarted) {
         setField(openCell(field, cellPos));
@@ -46,6 +52,15 @@ export function App() {
     [hasStarted, field]
   );
 
+  const onFlagCell = useCallback(
+    (cellPos: Position) => {
+      if (hasStarted) {
+        setField(toggleFlag(field, cellPos));
+      }
+    },
+    [hasStarted, field]
+  );
+
   return (
     <>
       <header>
@@ -59,15 +74,18 @@ export function App() {
       </header>
 
       <main>
-        <FieldView field={field} onClick={onCellClick} />
+        <FieldView
+          field={field}
+          onOpenCell={onOpenCell}
+          onFlagCell={onFlagCell}
+        />
 
         <output>
           <strong className="pill-blue">STATUS</strong>
           <span>
             {hasStarted
-              ? `${formatDuration(timeElapsedMs)} – 0 / ${
-                  field.numMines
-                } flagged`
+              ? `${formatDuration(timeElapsedMs)} – ` +
+                `${field.numFlags} / ${field.numMines} flagged`
               : "Waiting for first click"}
           </span>
         </output>
@@ -126,10 +144,12 @@ function FieldView({
     field,
     dimensions: { rows, columns }
   },
-  onClick
+  onOpenCell,
+  onFlagCell
 }: {
   field: Field;
-  onClick: (pos: Position) => void;
+  onOpenCell: (pos: Position) => void;
+  onFlagCell: (pos: Position) => void;
 }) {
   return (
     <div
@@ -145,7 +165,19 @@ function FieldView({
         }
 
         e.preventDefault();
-        onClick({
+        onOpenCell({
+          x: Number(target.dataset["posX"]),
+          y: Number(target.dataset["posY"])
+        });
+      }}
+      onContextMenu={(e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        e.preventDefault();
+        onFlagCell({
           x: Number(target.dataset["posX"]),
           y: Number(target.dataset["posY"])
         });
@@ -169,6 +201,7 @@ type CellButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   "data-pos-y": number;
   "data-open": boolean;
   "data-adjacency"?: number;
+  "data-flagged"?: boolean;
 };
 
 function CellButton({ cell, x, y }: { cell: Cell; x: number; y: number }) {
@@ -180,14 +213,19 @@ function CellButton({ cell, x, y }: { cell: Cell; x: number; y: number }) {
     children: "\u00A0" // non-breaking space
   };
 
-  if (cell.hasMine) {
-    props.children = "💣";
-  } else {
-    props["data-adjacency"] = cell.adjacentMines;
+  if (cell.isOpen) {
+    if (cell.hasMine) {
+      props.children = "💣";
+    } else {
+      props["data-adjacency"] = cell.adjacentMines;
 
-    if (cell.adjacentMines > 0) {
-      props.children = cell.adjacentMines;
+      if (cell.adjacentMines > 0) {
+        props.children = cell.adjacentMines;
+      }
     }
+  } else if (cell.hasFlag) {
+    props["data-flagged"] = true;
+    props.children = "🚩";
   }
 
   // eslint-disable-next-line react/button-has-type
