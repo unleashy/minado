@@ -117,9 +117,9 @@ function buildFieldArray({ rows, columns }: Dimensions): Cell[][] {
 
 export const openCell = produce(
   ({ field, dimensions }: Draft<Field>, pos: Position) => {
-    openCellRecursive(pos);
+    openCellCascade(pos);
 
-    function openCellRecursive(pos: Position) {
+    function openCellCascade(pos: Position) {
       const cell = getCell(field, pos);
       if (!(cell && isOpenable(cell))) {
         return;
@@ -133,7 +133,7 @@ export const openCell = produce(
 
       if (cell.adjacentMines === 0) {
         for (const adjacentPos of adjacentPositions(pos, dimensions)) {
-          openCellRecursive(adjacentPos);
+          openCellCascade(adjacentPos);
         }
       }
     }
