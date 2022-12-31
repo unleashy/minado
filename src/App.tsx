@@ -1,63 +1,63 @@
 import {
   type ButtonHTMLAttributes,
+  memo,
   type MouseEvent,
+  type ReactNode,
   useCallback,
   useEffect,
+  useRef,
   useState
 } from "react";
 import { Random } from "./random";
-import { type Position } from "./measures";
+import { type Dimensions, type Position } from "./measures";
 import { type Cell } from "./cell";
 import {
   type Field,
-  toggleFlag,
   genEmptyField,
   genField,
-  openCell
+  openCell,
+  toggleFlag
 } from "./field";
 
+/*
+Game states:
+  1 NOT_STARTED
+    Field: empty dummy
+    Timer: not present
+    Flag/mine count: not present
+    ∴ Status: “Waiting for first click”
+
+  2 PLAYING
+    Field: generated
+    Timer: present, running
+    Flag/mine count: present
+    ∴ Status: “{timer} - {flags} / {mines} flagged”
+
+  3 COMPLETED
+    Field: generated, disabled
+    Timer: present, stopped
+    Flag/mine count: present
+    ∴ Status: “COMPLETED in {timer} - {flags} / {mines} flagged”
+
+  4 DEAD
+    Field: generated, disabled
+    Timer: present, stopped
+    Flag/mine count: present
+    ∴ Status: “DEAD in {timer} - {flags} / {mines} flagged”
+*/
+
+type ToState = (element: JSX.Element) => void;
+
 export function App() {
-  const [hasStarted, timeElapsedMs, startTimer, resetTimer] = useTimer();
-  const [field, setField] = useState(() =>
-    genEmptyField({ rows: 9, columns: 9 })
-  );
+  const [gameState, setGameState] = useState<JSX.Element | undefined>();
+  if (gameState === undefined) {
+    setGameState(<StateNotStarted toState={setGameState} />);
+  }
 
-  const newGame = useCallback(
-    (e: MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-
-      setField(genEmptyField({ rows: 9, columns: 9 }));
-      resetTimer();
-    },
-    [resetTimer]
-  );
-
-  const onOpenCell = useCallback(
-    (cellPos: Position) => {
-      if (!hasStarted) {
-        startTimer();
-        setField((f) =>
-          genField(
-            { dimensions: f.dimensions, numMines: 10 },
-            cellPos,
-            new Random()
-          )
-        );
-      }
-
-      setField((f) => openCell(f, cellPos));
-    },
-    [hasStarted, startTimer]
-  );
-
-  const onFlagCell = useCallback(
-    (cellPos: Position) => {
-      if (hasStarted) {
-        setField((f) => toggleFlag(f, cellPos));
-      }
-    },
-    [hasStarted]
-  );
+  const newGame = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setGameState(<StateNotStarted toState={setGameState} />);
+  };
 
   return (
     <>
@@ -72,25 +72,85 @@ export function App() {
       </header>
 
       <main>
-        <FieldView
-          field={field}
-          onOpenCell={onOpenCell}
-          onFlagCell={onFlagCell}
-        />
-
-        <output>
-          <strong className="pill-blue">STATUS</strong>
-          <span>
-            {hasStarted
-              ? `${formatDuration(timeElapsedMs)} – ` +
-                `${field.numFlags} / ${field.numMines} flagged`
-              : "Waiting for first click"}
-          </span>
-        </output>
-
+        {gameState}
         <a href="/instructions.html">Instructions</a>
       </main>
     </>
+  );
+}
+
+function StateNotStarted({ toState }: { toState: ToState }) {
+  const field = genEmptyField({ rows: 9, columns: 9 });
+
+  return (
+    <FieldAndStatus
+      status="Waiting for first click"
+      field={field}
+      onOpenCell={(cellPos) => {
+        toState(
+          <StatePlaying
+            firstPosition={cellPos}
+            dimensions={field.dimensions}
+            numMines={10}
+            toState={toState}
+          />
+        );
+      }}
+      onFlagCell={() => {
+        /* no-op */
+      }}
+    />
+  );
+}
+
+function StatePlaying({
+  firstPosition,
+  dimensions,
+  numMines,
+  toState
+}: {
+  firstPosition: Position;
+  dimensions: Dimensions;
+  numMines: number;
+  toState: ToState;
+}) {
+  const [field, setField] = useState(() =>
+    openCell(
+      genField({ dimensions, numMines }, firstPosition, new Random()),
+      firstPosition
+    )
+  );
+
+  const { current: startTime } = useRef(performance.now());
+  const [elapsedTimeMs, setElapsedTimeMs] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setElapsedTimeMs(performance.now() - startTime);
+    }, 1000);
+
+    return () => {
+      clearInterval(id);
+    };
+  }, [startTime]);
+
+  const onOpenCell = useCallback((cellPos: Position) => {
+    setField((f) => openCell(f, cellPos));
+  }, []);
+
+  const onFlagCell = useCallback((flagPos: Position) => {
+    setField((f) => toggleFlag(f, flagPos));
+  }, []);
+
+  return (
+    <FieldAndStatus
+      status={
+        `${formatDuration(elapsedTimeMs)} – ` +
+        `${field.numFlags} / ${field.numMines} flagged`
+      }
+      field={field}
+      onOpenCell={onOpenCell}
+      onFlagCell={onFlagCell}
+    />
   );
 }
 
@@ -106,50 +166,43 @@ function formatDuration(durationMs: number): string {
   );
 }
 
-function useTimer() {
-  const [startTime, setStartTime] = useState<number | undefined>();
-  const [timeElapsed, setTimeElapsed] = useState(0);
-  useEffect(() => {
-    if (startTime === undefined) {
-      setTimeElapsed(0);
-      return;
-    }
-
-    const id = setInterval(() => {
-      setTimeElapsed(performance.now() - startTime);
-    }, 1000);
-
-    return () => {
-      clearInterval(id);
-    };
-  }, [startTime]);
-
-  return [
-    startTime !== undefined,
-    timeElapsed,
-    useCallback(() => {
-      setStartTime(performance.now());
-    }, []),
-    useCallback(() => {
-      // eslint-disable-next-line unicorn/no-useless-undefined
-      setStartTime(undefined);
-    }, [])
-  ] as const;
-}
-
-function FieldView({
-  field: {
-    field,
-    dimensions: { rows, columns }
-  },
-  onOpenCell,
-  onFlagCell
-}: {
+type FieldViewProps = {
   field: Field;
   onOpenCell: (pos: Position) => void;
   onFlagCell: (pos: Position) => void;
-}) {
+};
+
+function FieldAndStatus({
+  status,
+  field,
+  onOpenCell,
+  onFlagCell
+}: FieldViewProps & { status: string }) {
   return (
+    <>
+      <FieldView
+        field={field}
+        onOpenCell={onOpenCell}
+        onFlagCell={onFlagCell}
+      />
+
+      <output>
+        <strong className="pill-blue">STATUS</strong>
+        <span>{status}</span>
+      </output>
+    </>
+  );
+}
+
+const FieldView = memo(
+  ({
+    field: {
+      field,
+      dimensions: { rows, columns }
+    },
+    onOpenCell,
+    onFlagCell
+  }: FieldViewProps) => (
     <div
       id="field"
       style={{
@@ -186,13 +239,13 @@ function FieldView({
         <div key={y}>
           {row.map((cell, x) => (
             // eslint-disable-next-line react/no-array-index-key
-            <CellButton key={y * rows + x} cell={cell} x={x} y={y} />
+            <CellButton key={x} cell={cell} x={x} y={y} />
           ))}
         </div>
       ))}
     </div>
-  );
-}
+  )
+);
 
 type CellButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   "data-pos-x": number;
@@ -202,30 +255,32 @@ type CellButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   "data-flagged"?: boolean;
 };
 
-function CellButton({ cell, x, y }: { cell: Cell; x: number; y: number }) {
-  const props: CellButtonProps = {
-    type: "button",
-    "data-pos-x": x,
-    "data-pos-y": y,
-    "data-open": cell.isOpen,
-    children: "\u00A0" // non-breaking space
-  };
+const CellButton = memo(
+  ({ cell, x, y }: { cell: Cell; x: number; y: number }) => {
+    const props: CellButtonProps = {
+      type: "button",
+      "data-pos-x": x,
+      "data-pos-y": y,
+      "data-open": cell.isOpen,
+      children: "\u00A0" // non-breaking space
+    };
 
-  if (cell.isOpen) {
-    if (cell.hasMine) {
-      props.children = "💣";
-    } else {
-      props["data-adjacency"] = cell.adjacentMines;
+    if (cell.isOpen) {
+      if (cell.hasMine) {
+        props.children = "💣";
+      } else {
+        props["data-adjacency"] = cell.adjacentMines;
 
-      if (cell.adjacentMines > 0) {
-        props.children = cell.adjacentMines;
+        if (cell.adjacentMines > 0) {
+          props.children = cell.adjacentMines;
+        }
       }
+    } else if (cell.hasFlag) {
+      props["data-flagged"] = true;
+      props.children = "🚩";
     }
-  } else if (cell.hasFlag) {
-    props["data-flagged"] = true;
-    props.children = "🚩";
-  }
 
-  // eslint-disable-next-line react/button-has-type
-  return <button {...props} />;
-}
+    // eslint-disable-next-line react/button-has-type
+    return <button {...props} />;
+  }
+);

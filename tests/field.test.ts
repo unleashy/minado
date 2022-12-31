@@ -103,6 +103,13 @@ test("opening a cell with adjacent mines does not open any more cells", () => {
   ]);
 });
 
+// TODO:
+//  Click on an:
+//     - opened cell
+//     - with adjacent mines > 0
+//     - with adjacent flags == adjacent mines
+//   = open all 8 neighbouring cells including mines
+
 test("toggleFlag places/removes flags on closed cells", () => {
   const field = genField(
     { dimensions: { rows: 5, columns: 5 }, numMines: 5 },
