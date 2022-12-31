@@ -31,34 +31,29 @@ export function App() {
 
   const onOpenCell = useCallback(
     (cellPos: Position) => {
-      if (hasStarted) {
-        setField(openCell(field, cellPos));
-      } else {
+      if (!hasStarted) {
         startTimer();
-        setField(
-          openCell(
-            genField(
-              { dimensions: field.dimensions, numMines: 10 },
-              cellPos,
-              new Random()
-            ),
-            cellPos
+        setField((f) =>
+          genField(
+            { dimensions: f.dimensions, numMines: 10 },
+            cellPos,
+            new Random()
           )
         );
       }
+
+      setField((f) => openCell(f, cellPos));
     },
-    // "startTimer" has a stable identity.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hasStarted, field]
+    [hasStarted, startTimer]
   );
 
   const onFlagCell = useCallback(
     (cellPos: Position) => {
       if (hasStarted) {
-        setField(toggleFlag(field, cellPos));
+        setField((f) => toggleFlag(f, cellPos));
       }
     },
-    [hasStarted, field]
+    [hasStarted]
   );
 
   return (
