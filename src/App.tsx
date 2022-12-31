@@ -22,12 +22,15 @@ export function App() {
     genEmptyField({ rows: 9, columns: 9 })
   );
 
-  const newGame = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const newGame = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
 
-    setField(genEmptyField({ rows: 9, columns: 9 }));
-    resetTimer();
-  };
+      setField(genEmptyField({ rows: 9, columns: 9 }));
+      resetTimer();
+    },
+    [resetTimer]
+  );
 
   const onOpenCell = useCallback(
     (cellPos: Position) => {
