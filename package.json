@@ -2,7 +2,6 @@
   "name": "minado",
   "private": true,
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && eslint . && vite build",
