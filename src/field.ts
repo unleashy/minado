@@ -144,10 +144,6 @@ function isOpenable(cell: Cell): cell is CellEmptyClosed {
   return !(cell.isOpen || cell.hasFlag || cell.hasMine);
 }
 
-function hasNoAdjacentMines(adjacentCell: Cell): boolean {
-  return !adjacentCell.hasMine && adjacentCell.adjacentMines === 0;
-}
-
 export const toggleFlag = produce((draft: Draft<Field>, pos: Position) => {
   const cell = getCell(draft.field, pos);
   if (!cell || cell.isOpen) {
@@ -161,6 +157,22 @@ export const toggleFlag = produce((draft: Draft<Field>, pos: Position) => {
     --draft.numFlags;
   }
 });
+
+/*
+
+hasMine  isOpen  result
+F        F       F
+F        T       T
+T        F       T
+T        T       F
+
+*/
+
+export function isCompleted({ field }: Field): boolean {
+  return field.every((row) =>
+    row.every((cell) => (cell.hasMine ? !cell.isOpen : cell.isOpen))
+  );
+}
 
 function getCell(field: Cell[][], pos: Position): Cell | undefined {
   return field[pos.y]?.[pos.x];

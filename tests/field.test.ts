@@ -1,7 +1,13 @@
 import { expect, test } from "vitest";
 import { Random } from "../src/random";
 import { areAdjacent, type Dimensions, type Position } from "../src/measures";
-import { genEmptyField, genField, openCell, toggleFlag } from "../src/field";
+import {
+  genEmptyField,
+  genField,
+  isCompleted,
+  openCell,
+  toggleFlag
+} from "../src/field";
 
 test("genEmptyField generates an empty field", () => {
   const dimensions: Dimensions = { rows: 2, columns: 2 };
@@ -134,4 +140,40 @@ test("toggleFlag places/removes flags on closed cells", () => {
   const unflaggedField = toggleFlag(flaggedField, { x: 4, y: 1 });
 
   expect(field).toEqual(unflaggedField);
+});
+
+test("isCompleted returns true if all unopened cells have mines", () => {
+  const field = openCell(
+    genField(
+      { dimensions: { rows: 3, columns: 3 }, numMines: 2 },
+      { x: 0, y: 0 },
+      new Random(4)
+    ),
+    { x: 0, y: 0 }
+  );
+
+  const fieldPicture = field.field.map((row) =>
+    row.map((cell) => (cell.hasMine ? "M" : cell.isOpen ? "O" : "X")).join("")
+  );
+
+  // prettier-ignore
+  expect(fieldPicture).toEqual([
+    "OOO",
+    "OOO",
+    "MXM",
+  ]);
+  expect(isCompleted(field)).toBe(false);
+
+  const newField = openCell(field, { x: 1, y: 2 });
+
+  const newFieldPicture = newField.field.map((row) =>
+    row.map((cell) => (cell.hasMine ? "M" : cell.isOpen ? "O" : "X")).join("")
+  );
+  // prettier-ignore
+  expect(newFieldPicture).toEqual([
+    "OOO",
+    "OOO",
+    "MOM",
+  ]);
+  expect(isCompleted(newField)).toBe(true);
 });

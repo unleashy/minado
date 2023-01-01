@@ -15,6 +15,7 @@ import {
   type Field,
   genEmptyField,
   genField,
+  isCompleted,
   openCell,
   toggleFlag
 } from "./field";
@@ -133,9 +134,22 @@ function StatePlaying({
     };
   }, [startTime]);
 
-  const onOpenCell = useCallback((cellPos: Position) => {
-    setField((f) => openCell(f, cellPos));
-  }, []);
+  const onOpenCell = useCallback(
+    (cellPos: Position) => {
+      const newField = openCell(field, cellPos);
+      if (isCompleted(newField)) {
+        toState(
+          <StateComplete
+            field={newField}
+            elapsedTimeMs={performance.now() - startTime}
+          />
+        );
+      } else {
+        setField(newField);
+      }
+    },
+    [field, startTime, toState]
+  );
 
   const onFlagCell = useCallback((flagPos: Position) => {
     setField((f) => toggleFlag(f, flagPos));
@@ -150,6 +164,32 @@ function StatePlaying({
       field={field}
       onOpenCell={onOpenCell}
       onFlagCell={onFlagCell}
+    />
+  );
+}
+
+function StateComplete({
+  field,
+  elapsedTimeMs
+}: {
+  field: Field;
+  elapsedTimeMs: number;
+}) {
+  return (
+    <FieldAndStatus
+      status={
+        <>
+          <strong>✅ COMPLETE</strong> in {formatDuration(elapsedTimeMs)} –{" "}
+          {field.numFlags} / {field.numMines} flagged
+        </>
+      }
+      field={field}
+      onOpenCell={() => {
+        /* no-op */
+      }}
+      onFlagCell={() => {
+        /* no-op */
+      }}
     />
   );
 }
@@ -177,7 +217,7 @@ function FieldAndStatus({
   field,
   onOpenCell,
   onFlagCell
-}: FieldViewProps & { status: string }) {
+}: FieldViewProps & { status: ReactNode }) {
   return (
     <>
       <FieldView
