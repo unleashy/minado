@@ -1,8 +1,8 @@
 import {
   type ButtonHTMLAttributes,
-  memo,
   type MouseEvent,
   type ReactNode,
+  memo,
   useCallback,
   useEffect,
   useRef,
@@ -84,23 +84,26 @@ function StateNotStarted({ toState }: { toState: ToState }) {
   const field = genEmptyField({ rows: 9, columns: 9 });
 
   return (
-    <FieldAndStatus
-      status="Waiting for first click"
-      field={field}
-      onOpenCell={(cellPos) => {
-        toState(
-          <StatePlaying
-            firstPosition={cellPos}
-            dimensions={field.dimensions}
-            numMines={10}
-            toState={toState}
-          />
-        );
-      }}
-      onFlagCell={() => {
-        /* no-op */
-      }}
-    />
+    <>
+      <FieldView
+        field={field}
+        onOpenCell={(cellPos) => {
+          toState(
+            <StatePlaying
+              firstPosition={cellPos}
+              dimensions={field.dimensions}
+              numMines={10}
+              toState={toState}
+            />
+          );
+        }}
+        onFlagCell={() => {
+          /* no-op */
+        }}
+      />
+
+      <Status>Waiting for first click</Status>
+    </>
   );
 }
 
@@ -156,15 +159,18 @@ function StatePlaying({
   }, []);
 
   return (
-    <FieldAndStatus
-      status={
-        `${formatDuration(elapsedTimeMs)} – ` +
-        `${field.numFlags} / ${field.numMines} flagged`
-      }
-      field={field}
-      onOpenCell={onOpenCell}
-      onFlagCell={onFlagCell}
-    />
+    <>
+      <FieldView
+        field={field}
+        onOpenCell={onOpenCell}
+        onFlagCell={onFlagCell}
+      />
+
+      <Status>
+        {formatDuration(elapsedTimeMs)} – {field.numFlags} / {field.numMines}{" "}
+        flagged
+      </Status>
+    </>
   );
 }
 
@@ -176,60 +182,21 @@ function StateComplete({
   elapsedTimeMs: number;
 }) {
   return (
-    <FieldAndStatus
-      status={
-        <>
-          <strong>✅ COMPLETE</strong> in {formatDuration(elapsedTimeMs)} –{" "}
-          {field.numFlags} / {field.numMines} flagged
-        </>
-      }
-      field={field}
-      onOpenCell={() => {
-        /* no-op */
-      }}
-      onFlagCell={() => {
-        /* no-op */
-      }}
-    />
-  );
-}
-
-function formatDuration(durationMs: number): string {
-  const deltaMins = Math.floor(durationMs / 60_000);
-  const deltaSecs = Math.floor((durationMs - deltaMins * 60_000) / 1000);
-
-  return (
-    deltaMins.toString().padStart(1, "0") +
-    "m" +
-    deltaSecs.toString().padStart(2, "0") +
-    "s"
-  );
-}
-
-type FieldViewProps = {
-  field: Field;
-  onOpenCell: (pos: Position) => void;
-  onFlagCell: (pos: Position) => void;
-};
-
-function FieldAndStatus({
-  status,
-  field,
-  onOpenCell,
-  onFlagCell
-}: FieldViewProps & { status: ReactNode }) {
-  return (
     <>
       <FieldView
         field={field}
-        onOpenCell={onOpenCell}
-        onFlagCell={onFlagCell}
+        onOpenCell={() => {
+          /* no-op */
+        }}
+        onFlagCell={() => {
+          /* no-op */
+        }}
       />
 
-      <output>
-        <strong className="pill-blue">STATUS</strong>
-        <span>{status}</span>
-      </output>
+      <Status>
+        <strong>✅ COMPLETE</strong> in {formatDuration(elapsedTimeMs)} –{" "}
+        {field.numFlags} / {field.numMines} flagged
+      </Status>
     </>
   );
 }
@@ -242,7 +209,11 @@ const FieldView = memo(
     },
     onOpenCell,
     onFlagCell
-  }: FieldViewProps) => (
+  }: {
+    field: Field;
+    onOpenCell: (pos: Position) => void;
+    onFlagCell: (pos: Position) => void;
+  }) => (
     <div
       id="field"
       style={{
@@ -324,3 +295,22 @@ const CellButton = memo(
     return <button {...props} />;
   }
 );
+
+const Status = memo(({ children }: { children: ReactNode }) => (
+  <output>
+    <strong className="pill-blue">STATUS</strong>
+    <span>{children}</span>
+  </output>
+));
+
+function formatDuration(durationMs: number): string {
+  const deltaMins = Math.floor(durationMs / 60_000);
+  const deltaSecs = Math.floor((durationMs - deltaMins * 60_000) / 1000);
+
+  return (
+    deltaMins.toString().padStart(1, "0") +
+    "m" +
+    deltaSecs.toString().padStart(2, "0") +
+    "s"
+  );
+}
