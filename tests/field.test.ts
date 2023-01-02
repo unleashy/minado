@@ -71,7 +71,7 @@ test("openCell opens reachable empty cells", () => {
   );
 
   const pos: Position = { x: 2, y: 3 };
-  const newField = openCell(field, pos);
+  const { field: newField, mineOpened } = openCell(field, pos);
 
   const fieldPicture = newField.field.map((row) =>
     row.map((cell) => (cell.hasMine ? "M" : cell.isOpen ? "O" : "X")).join("")
@@ -84,6 +84,7 @@ test("openCell opens reachable empty cells", () => {
     "MOOOO",
     "MOOOO",
   ]);
+  expect(mineOpened).toBe(false);
 });
 
 test("opening a cell with adjacent mines does not open any more cells", () => {
@@ -94,7 +95,7 @@ test("opening a cell with adjacent mines does not open any more cells", () => {
   );
 
   const pos: Position = { x: 2, y: 2 };
-  const newField = openCell(field, pos);
+  const { field: newField, mineOpened } = openCell(field, pos);
 
   const fieldPicture = newField.field.map((row) =>
     row.map((cell) => (cell.hasMine ? "M" : cell.isOpen ? "O" : "X")).join("")
@@ -107,6 +108,20 @@ test("opening a cell with adjacent mines does not open any more cells", () => {
     "MXXXX",
     "MXXXX",
   ]);
+  expect(mineOpened).toBe(false);
+});
+
+test("directly opening a cell with a mine sets mineOpened to true", () => {
+  const field = genField(
+    { dimensions: { rows: 5, columns: 5 }, numMines: 5 },
+    { x: 0, y: 0 },
+    new Random(4)
+  );
+
+  const pos: Position = { x: 0, y: 3 };
+  const { mineOpened } = openCell(field, pos);
+
+  expect(mineOpened).toBe(true);
 });
 
 // TODO:
@@ -143,7 +158,7 @@ test("toggleFlag places/removes flags on closed cells", () => {
 });
 
 test("isCompleted returns true if all unopened cells have mines", () => {
-  const field = openCell(
+  const { field } = openCell(
     genField(
       { dimensions: { rows: 3, columns: 3 }, numMines: 2 },
       { x: 0, y: 0 },
@@ -164,7 +179,7 @@ test("isCompleted returns true if all unopened cells have mines", () => {
   ]);
   expect(isCompleted(field)).toBe(false);
 
-  const newField = openCell(field, { x: 1, y: 2 });
+  const { field: newField } = openCell(field, { x: 1, y: 2 });
 
   const newFieldPicture = newField.field.map((row) =>
     row.map((cell) => (cell.hasMine ? "M" : cell.isOpen ? "O" : "X")).join("")

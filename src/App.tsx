@@ -24,7 +24,7 @@ import {
 
 const MIN_SIZE = 4;
 const MAX_SIZE = 32;
-const MIN_MINES = 4;
+const MIN_MINES = 1;
 const MIN_SAFE_CELLS = 9;
 const MAX_MINES = MAX_SIZE * MAX_SIZE - MIN_SAFE_CELLS;
 
@@ -128,12 +128,18 @@ function StatePlaying({
   numMines: number;
   toState: ToState;
 }) {
-  const [field, setField] = useState(() =>
-    openCell(
+  const [field, setField] = useState(() => {
+    const { field, mineOpened } = openCell(
       genField({ dimensions, numMines }, firstPosition, new Random()),
       firstPosition
-    )
-  );
+    );
+
+    if (mineOpened) {
+      throw new Error("mine opened upon field generation!");
+    }
+
+    return field;
+  });
 
   const { current: startTime } = useRef(performance.now());
   const [elapsedTimeMs, setElapsedTimeMs] = useState(0);
@@ -149,8 +155,16 @@ function StatePlaying({
 
   const onOpenCell = useCallback(
     (cellPos: Position) => {
-      const newField = openCell(field, cellPos);
-      if (isCompleted(newField)) {
+      const { field: newField, mineOpened } = openCell(field, cellPos);
+
+      if (mineOpened) {
+        toState(
+          <StateDead
+            field={newField}
+            elapsedTimeMs={performance.now() - startTime}
+          />
+        );
+      } else if (isCompleted(newField)) {
         toState(
           <StateComplete
             field={newField}
@@ -205,6 +219,33 @@ function StateComplete({
 
       <Status>
         <strong>✅ COMPLETE</strong> in {formatDuration(elapsedTimeMs)} –{" "}
+        {field.numFlags} / {field.numMines} flagged
+      </Status>
+    </>
+  );
+}
+
+function StateDead({
+  field,
+  elapsedTimeMs
+}: {
+  field: Field;
+  elapsedTimeMs: number;
+}) {
+  return (
+    <>
+      <FieldView
+        field={field}
+        onOpenCell={() => {
+          /* no-op */
+        }}
+        onFlagCell={() => {
+          /* no-op */
+        }}
+      />
+
+      <Status>
+        <strong>💀 DEAD</strong> in {formatDuration(elapsedTimeMs)} –{" "}
         {field.numFlags} / {field.numMines} flagged
       </Status>
     </>
@@ -274,6 +315,7 @@ type CellButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   "data-open": boolean;
   "data-adjacency"?: number;
   "data-flagged"?: boolean;
+  "data-mine"?: boolean;
 };
 
 const CellButton = memo(
@@ -288,6 +330,7 @@ const CellButton = memo(
 
     if (cell.isOpen) {
       if (cell.hasMine) {
+        props["data-mine"] = true;
         props.children = "💣";
       } else {
         props["data-adjacency"] = cell.adjacentMines;

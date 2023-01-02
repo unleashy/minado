@@ -35,6 +35,7 @@
   --cell-open-bg: #c8c7c1;
   --cell-open-shadow: inset 3px 1px 7px #b1b0ad;
   --cell-flag-bg: linear-gradient(150deg, #fef2a4, #fff8bb, #dbdbd7);
+  --cell-mine-bg: linear-gradient(150deg, #ea9280, #e54d2e 70%);
   --pill-blue-bg: #10243e;
   --popover-bg: #fbfdfc;
   --popover-text-colour: var(--page-bg);
@@ -195,6 +196,10 @@ main {
 #field button:active,
 #field button[data-open="true"] {
   background: var(--cell-open-bg);
+}
+
+#field button[data-mine="true"] {
+  background: var(--cell-mine-bg);
 }
 
 #field > :first-child > :first-child {

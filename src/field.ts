@@ -5,7 +5,7 @@ import {
   type Dimensions,
   type Position
 } from "./measures";
-import { type Cell, type CellEmptyClosed, type CellMine } from "./cell";
+import { type Cell, type CellEmptyClosed, type CellMineClosed } from "./cell";
 import { type Random } from "./random";
 
 export type Field = {
@@ -68,7 +68,7 @@ function randomlyPlaceMines(
       continue;
     }
 
-    const mine: CellMine = {
+    const mine: CellMineClosed = {
       isOpen: false,
       hasMine: true,
       hasFlag: false
@@ -115,7 +115,25 @@ function buildFieldArray({ rows, columns }: Dimensions): Cell[][] {
   );
 }
 
-export const openCell = produce(
+export type OpenCellResult = {
+  field: Field;
+  mineOpened: boolean;
+};
+
+export function openCell(field: Field, pos: Position): OpenCellResult {
+  field = produceOpenCell(field, pos);
+
+  const mineOpened = getCell(field.field, pos)?.hasMine ?? false;
+  if (mineOpened) {
+    field = produce(field, ({ field }) => {
+      setCell(field, pos, { isOpen: true, hasMine: true });
+    });
+  }
+
+  return { field, mineOpened };
+}
+
+const produceOpenCell = produce(
   ({ field, dimensions }: Draft<Field>, pos: Position) => {
     openCellCascade(pos);
 
@@ -157,16 +175,6 @@ export const toggleFlag = produce((draft: Draft<Field>, pos: Position) => {
     --draft.numFlags;
   }
 });
-
-/*
-
-hasMine  isOpen  result
-F        F       F
-F        T       T
-T        F       T
-T        T       F
-
-*/
 
 export function isCompleted({ field }: Field): boolean {
   return field.every((row) =>

@@ -11,10 +11,19 @@ export type CellEmptyOpen = {
   adjacentMines: number;
 };
 
-export type CellMine = {
+export type CellMineClosed = {
   isOpen: false;
   hasMine: true;
   hasFlag: boolean;
 };
 
-export type Cell = CellEmptyClosed | CellEmptyOpen | CellMine;
+export type CellMineOpen = {
+  isOpen: true;
+  hasMine: true;
+};
+
+export type Cell =
+  | CellEmptyClosed
+  | CellEmptyOpen
+  | CellMineClosed
+  | CellMineOpen;
