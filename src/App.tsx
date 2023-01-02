@@ -22,32 +22,11 @@ import {
   toggleFlag
 } from "./field";
 
-/*
-Game states:
-  1 NOT_STARTED
-    Field: empty dummy
-    Timer: not present
-    Flag/mine count: not present
-    ∴ Status: “Waiting for first click”
-
-  2 PLAYING
-    Field: generated
-    Timer: present, running
-    Flag/mine count: present
-    ∴ Status: “{timer} - {flags} / {mines} flagged”
-
-  3 COMPLETED
-    Field: generated, disabled
-    Timer: present, stopped
-    Flag/mine count: present
-    ∴ Status: “COMPLETED in {timer} - {flags} / {mines} flagged”
-
-  4 DEAD
-    Field: generated, disabled
-    Timer: present, stopped
-    Flag/mine count: present
-    ∴ Status: “DEAD in {timer} - {flags} / {mines} flagged”
-*/
+const MIN_SIZE = 4;
+const MAX_SIZE = 32;
+const MIN_MINES = 4;
+const MIN_SAFE_CELLS = 9;
+const MAX_MINES = MAX_SIZE * MAX_SIZE - MIN_SAFE_CELLS;
 
 type ToState = (element: JSX.Element) => void;
 
@@ -401,8 +380,8 @@ function CustomiseGame({
                 id="rows"
                 className="width:6ch"
                 value={rows}
-                min={4}
-                max={32}
+                min={MIN_SIZE}
+                max={MAX_SIZE}
                 onChange={(e) => {
                   setRows(e.target.value);
                 }}
@@ -416,8 +395,8 @@ function CustomiseGame({
                 id="columns"
                 className="width:6ch"
                 value={columns}
-                min={4}
-                max={32}
+                min={MIN_SIZE}
+                max={MAX_SIZE}
                 onChange={(e) => {
                   setColumns(e.target.value);
                 }}
@@ -431,8 +410,8 @@ function CustomiseGame({
                 id="mines"
                 className="width:6ch"
                 value={numMines}
-                min={1}
-                max={1015}
+                min={MIN_MINES}
+                max={MAX_MINES}
                 onChange={(e) => {
                   setNumMines(e.target.value);
                 }}
@@ -458,8 +437,10 @@ function validateRows(rows: string): number {
 
   const result = Number(rows);
 
-  if (result < 4 || 32 < result) {
-    throw new Error("Enter a number between 4 and 32 for the amount of rows");
+  if (result < MIN_SIZE || MAX_SIZE < result) {
+    throw new Error(
+      `Enter a number between ${MIN_SIZE} and ${MAX_SIZE} for the amount of rows`
+    );
   }
 
   return result;
@@ -472,9 +453,9 @@ function validateColumns(columns: string): number {
 
   const result = Number(columns);
 
-  if (result < 4 || 32 < result) {
+  if (result < MIN_SIZE || MAX_SIZE < result) {
     throw new Error(
-      "Enter a number between 4 and 32 for the amount of columns"
+      `Enter a number between ${MIN_SIZE} and ${MAX_SIZE} for the amount of columns`
     );
   }
 
@@ -488,9 +469,11 @@ function validateNumMines(numMines: string, numCells: number): number {
 
   const result = Number(numMines);
 
-  if (result < 1 || numCells - 9 < result) {
+  if (result < MIN_MINES || numCells - MIN_SAFE_CELLS < result) {
     throw new Error(
-      `Enter a number between 1 and ${numCells - 9} for the amount of mines`
+      `Enter a number between ${MIN_MINES} and ${
+        numCells - MIN_SAFE_CELLS
+      } for the amount of mines`
     );
   }
 
