@@ -15,6 +15,7 @@ import { type Dimensions, type Position } from "./measures";
 import { type Cell } from "./cell";
 import {
   type Field,
+  flagAllClosedCells,
   genEmptyField,
   genField,
   isCompleted,
@@ -167,7 +168,7 @@ function StatePlaying({
       } else if (isCompleted(newField)) {
         toState(
           <StateComplete
-            field={newField}
+            field={flagAllClosedCells(newField)}
             elapsedTimeMs={performance.now() - startTime}
           />
         );
@@ -218,8 +219,7 @@ function StateComplete({
       />
 
       <Status>
-        <strong>✅ COMPLETE</strong> in {formatDuration(elapsedTimeMs)} –{" "}
-        {field.numFlags} / {field.numMines} flagged
+        <strong>✅ COMPLETE</strong> in {formatDuration(elapsedTimeMs)}!
       </Status>
     </>
   );
@@ -245,8 +245,7 @@ function StateDead({
       />
 
       <Status>
-        <strong>💀 DEAD</strong> in {formatDuration(elapsedTimeMs)} –{" "}
-        {field.numFlags} / {field.numMines} flagged
+        <strong>💀 DEAD</strong> in {formatDuration(elapsedTimeMs)}
       </Status>
     </>
   );

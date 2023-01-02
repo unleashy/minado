@@ -176,6 +176,16 @@ export const toggleFlag = produce((draft: Draft<Field>, pos: Position) => {
   }
 });
 
+export const flagAllClosedCells = produce(({ field }: Draft<Field>) => {
+  const closedCells = field.flatMap((row) =>
+    row.filter((cell): cell is CellEmptyClosed | CellMineClosed => !cell.isOpen)
+  );
+
+  for (const cell of closedCells) {
+    cell.hasFlag = true;
+  }
+});
+
 export function isCompleted({ field }: Field): boolean {
   return field.every((row) =>
     row.every((cell) => (cell.hasMine ? !cell.isOpen : cell.isOpen))
