@@ -2,12 +2,14 @@ import {
   type ButtonHTMLAttributes,
   type MouseEvent,
   type ReactNode,
+  type FormEvent,
   memo,
   useCallback,
   useEffect,
   useRef,
   useState
 } from "react";
+import * as Popover from "@radix-ui/react-popover";
 import { Random } from "./random";
 import { type Dimensions, type Position } from "./measures";
 import { type Cell } from "./cell";
@@ -50,14 +52,36 @@ Game states:
 type ToState = (element: JSX.Element) => void;
 
 export function App() {
+  const [dimensions, setDimensions] = useState<Dimensions>({
+    rows: 9,
+    columns: 9
+  });
+  const [numMines, setNumMines] = useState(10);
+
   const [gameState, setGameState] = useState<JSX.Element | undefined>();
+  const toNotStarted = (dimensions: Dimensions, numMines: number) => {
+    setGameState(
+      <StateNotStarted
+        dimensions={dimensions}
+        numMines={numMines}
+        toState={setGameState}
+      />
+    );
+  };
+
   if (gameState === undefined) {
-    setGameState(<StateNotStarted toState={setGameState} />);
+    toNotStarted(dimensions, numMines);
   }
 
   const newGame = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setGameState(<StateNotStarted toState={setGameState} />);
+    toNotStarted(dimensions, numMines);
+  };
+
+  const customise = (dimensions: Dimensions, numMines: number) => {
+    setDimensions(dimensions);
+    setNumMines(numMines);
+    toNotStarted(dimensions, numMines);
   };
 
   return (
@@ -68,7 +92,8 @@ export function App() {
           <button type="button" onClick={newGame}>
             New game
           </button>
-          <button type="button">Customise game</button>
+
+          <CustomiseGame onCustomisation={customise} />
         </nav>
       </header>
 
@@ -80,19 +105,25 @@ export function App() {
   );
 }
 
-function StateNotStarted({ toState }: { toState: ToState }) {
-  const field = genEmptyField({ rows: 9, columns: 9 });
-
+function StateNotStarted({
+  dimensions,
+  numMines,
+  toState
+}: {
+  dimensions: Dimensions;
+  numMines: number;
+  toState: ToState;
+}) {
   return (
     <>
       <FieldView
-        field={field}
+        field={genEmptyField(dimensions)}
         onOpenCell={(cellPos) => {
           toState(
             <StatePlaying
               firstPosition={cellPos}
-              dimensions={field.dimensions}
-              numMines={10}
+              dimensions={dimensions}
+              numMines={numMines}
               toState={toState}
             />
           );
@@ -313,4 +344,155 @@ function formatDuration(durationMs: number): string {
     deltaSecs.toString().padStart(2, "0") +
     "s"
   );
+}
+
+function CustomiseGame({
+  onCustomisation
+}: {
+  onCustomisation: (dimensions: Dimensions, numMines: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const [rows, setRows] = useState("9");
+  const [columns, setColumns] = useState("9");
+  const [numMines, setNumMines] = useState("10");
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    let dimensions: Dimensions;
+    let numMinesValidated: number;
+    try {
+      dimensions = {
+        rows: validateRows(rows),
+        columns: validateColumns(columns)
+      };
+
+      numMinesValidated = validateNumMines(
+        numMines,
+        dimensions.rows * dimensions.columns
+      );
+    } catch (error: unknown) {
+      if (!(error instanceof Error)) {
+        throw error;
+      }
+
+      // eslint-disable-next-line no-alert
+      alert(`There was a problem: ${error.message}`);
+      return;
+    }
+
+    setOpen(false);
+    onCustomisation(dimensions, numMinesValidated);
+  };
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger>Customise game</Popover.Trigger>
+      <Popover.Content className="popover">
+        <Popover.Arrow className="popover-arrow" />
+        <div className="flex-0.25rem">
+          <h2>Field settings</h2>
+          <form noValidate onSubmit={onSubmit}>
+            <div>
+              <label htmlFor="rows">Rows</label>
+              <input
+                type="number"
+                id="rows"
+                className="width:6ch"
+                value={rows}
+                min={4}
+                max={32}
+                onChange={(e) => {
+                  setRows(e.target.value);
+                }}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="columns">Columns</label>
+              <input
+                type="number"
+                id="columns"
+                className="width:6ch"
+                value={columns}
+                min={4}
+                max={32}
+                onChange={(e) => {
+                  setColumns(e.target.value);
+                }}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="mines">Mines</label>
+              <input
+                type="number"
+                id="mines"
+                className="width:6ch"
+                value={numMines}
+                min={1}
+                max={1015}
+                onChange={(e) => {
+                  setNumMines(e.target.value);
+                }}
+              />
+            </div>
+
+            <div className="margin-top:0.5rem">
+              <button type="submit" className="button-light">
+                Apply and restart
+              </button>
+            </div>
+          </form>
+        </div>
+      </Popover.Content>
+    </Popover.Root>
+  );
+}
+
+function validateRows(rows: string): number {
+  if (!/^\d+$/.test(rows)) {
+    throw new Error("Enter a number for the amount of rows");
+  }
+
+  const result = Number(rows);
+
+  if (result < 4 || 32 < result) {
+    throw new Error("Enter a number between 4 and 32 for the amount of rows");
+  }
+
+  return result;
+}
+
+function validateColumns(columns: string): number {
+  if (!/^\d+$/.test(columns)) {
+    throw new Error("Enter a number for the amount of columns");
+  }
+
+  const result = Number(columns);
+
+  if (result < 4 || 32 < result) {
+    throw new Error(
+      "Enter a number between 4 and 32 for the amount of columns"
+    );
+  }
+
+  return result;
+}
+
+function validateNumMines(numMines: string, numCells: number): number {
+  if (!/^\d+$/.test(numMines)) {
+    throw new Error("Enter a number for the amount of mines");
+  }
+
+  const result = Number(numMines);
+
+  if (result < 1 || numCells - 9 < result) {
+    throw new Error(
+      `Enter a number between 1 and ${numCells - 9} for the amount of mines`
+    );
+  }
+
+  return result;
 }
